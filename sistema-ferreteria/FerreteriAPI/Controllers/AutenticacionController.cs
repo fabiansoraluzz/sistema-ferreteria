@@ -1,8 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using FerreteriAPI.Data;
+﻿using FerreteriAPI.Data;
 using FerreteriAPI.DTOs.Auth;
 using FerreteriAPI.Helpers;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace FerreteriAPI.Controllers;
 
@@ -43,5 +44,14 @@ public class AutenticacionController : ControllerBase
             usuario.Rol,
             usuario.Id
         ));
+    }
+
+    // TEMPORAL — solo para generar hash, eliminar después
+    [HttpGet("generar-hash")]
+    [AllowAnonymous]
+    public IActionResult GenerarHash([FromQuery] string contrasena)
+    {
+        var hash = BCrypt.Net.BCrypt.HashPassword(contrasena);
+        return Ok(new { hash });
     }
 }
