@@ -24,9 +24,6 @@
 
   <ItemGroup>
     <Folder Include="Data\Migrations\" />
-    <Folder Include="DTOs\Productos\" />
-    <Folder Include="DTOs\Pedidos\" />
-    <Folder Include="DTOs\Clientes\" />
     <Folder Include="Repositories\Interfaces\" />
   </ItemGroup>
 

@@ -20,9 +20,9 @@ public class AutenticacionController : ControllerBase
         _jwt = jwt;
     }
 
-    /// <summary>POST /api/autenticacion/login</summary>
-    [HttpPost("login")]
-    public async Task<IActionResult> Login([FromBody] LoginRequest request)
+    /// <summary>IniciarSesion — Valida credenciales y devuelve un token JWT.</summary>
+    [HttpPost("IniciarSesion")]
+    public async Task<IActionResult> IniciarSesion([FromBody] LoginRequest request)
     {
         var usuario = await _db.Usuarios
             .FirstOrDefaultAsync(u =>
