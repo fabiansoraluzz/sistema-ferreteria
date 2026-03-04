@@ -4,7 +4,7 @@ EXPOSE 8080
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
-COPY . .
+COPY sistema-ferreteria/ .
 RUN dotnet restore "FerreteriAPI/FerreteriAPI.csproj"
 RUN dotnet publish "FerreteriAPI/FerreteriAPI.csproj" -c Release -o /app/publish
 
