@@ -54,6 +54,9 @@ builder.Services.AddScoped<ICategoriaService, CategoriaService>();
 builder.Services.AddScoped<IProductoService, ProductoService>();
 builder.Services.AddScoped<IClienteService, ClienteService>();
 builder.Services.AddScoped<IPedidoService, PedidoService>();
+builder.Services.AddScoped<IPagoService, PagoService>();
+builder.Services.AddScoped<IDespachoService, DespachoService>();
+builder.Services.AddScoped<IAuditoriaService, AuditoriaService>();
 
 // ── 6. CORS ───────────────────────────────────────────────────────────────────
 var origenes = builder.Configuration["Cors:OrigenesPermitidos"]
