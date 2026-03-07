@@ -165,8 +165,8 @@ export default function DetalleClientePage() {
                 <button
                     onClick={() => setPestana("deuda")}
                     className={`flex-1 py-3 text-base font-bold rounded-xl transition-all ${pestana === "deuda"
-                            ? "bg-white text-red-600 shadow-sm"
-                            : "text-slate-500 hover:text-slate-700"
+                        ? "bg-white text-red-600 shadow-sm"
+                        : "text-slate-500 hover:text-slate-700"
                         }`}
                 >
                     Lo que debe
@@ -174,8 +174,8 @@ export default function DetalleClientePage() {
                 <button
                     onClick={() => setPestana("pedidos")}
                     className={`flex-1 py-3 text-base font-bold rounded-xl transition-all ${pestana === "pedidos"
-                            ? "bg-white text-blue-600 shadow-sm"
-                            : "text-slate-500 hover:text-slate-700"
+                        ? "bg-white text-blue-600 shadow-sm"
+                        : "text-slate-500 hover:text-slate-700"
                         }`}
                 >
                     Sus pedidos

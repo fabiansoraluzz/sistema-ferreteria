@@ -95,7 +95,7 @@ export default function DetalleProductoPage() {
             <Alerta mensaje={alerta.mensaje} tipo={alerta.tipo} visible={alerta.visible} />
 
             <div className={`rounded-2xl p-6 text-white shadow-sm ${estadoStock === "sinStock" ? "bg-red-500" :
-                    estadoStock === "pocoStock" ? "bg-orange-400" : "bg-green-500"
+                estadoStock === "pocoStock" ? "bg-orange-400" : "bg-green-500"
                 }`}>
                 <div className="flex items-center gap-2 mb-4">
                     {estadoStock === "sinStock" && <XCircle size={22} />}

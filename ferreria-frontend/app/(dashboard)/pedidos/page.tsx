@@ -28,7 +28,7 @@ export default function PedidosPage() {
 
     useEffect(() => {
         cargarPedidos();
-    }, [estado]);
+    }, []);
 
     async function cargarPedidos() {
         setCargando(true);
@@ -87,8 +87,8 @@ export default function PedidosPage() {
                         key={e.valor}
                         onClick={() => setEstado(e.valor)}
                         className={`shrink-0 px-4 py-2.5 rounded-2xl text-base font-bold border-2 transition-all ${estado === e.valor
-                                ? e.color + " border-transparent shadow-sm"
-                                : e.inactivo
+                            ? e.color + " border-transparent shadow-sm"
+                            : e.inactivo
                             }`}
                     >
                         {e.label}
@@ -133,16 +133,16 @@ export default function PedidosPage() {
                                 >
                                     <div className="flex items-center gap-3 flex-1 min-w-0">
                                         <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${p.estadoPedido === "Pendiente" ? "bg-amber-100" :
-                                                p.estadoPedido === "Confirmado" ? "bg-blue-100" :
-                                                    p.estadoPedido === "EnReparto" ? "bg-orange-100" :
-                                                        p.estadoPedido === "Entregado" ? "bg-green-100" :
-                                                            "bg-slate-100"
+                                            p.estadoPedido === "Confirmado" ? "bg-blue-100" :
+                                                p.estadoPedido === "EnReparto" ? "bg-orange-100" :
+                                                    p.estadoPedido === "Entregado" ? "bg-green-100" :
+                                                        "bg-slate-100"
                                             }`}>
                                             <ClipboardList size={20} className={`${p.estadoPedido === "Pendiente" ? "text-amber-600" :
-                                                    p.estadoPedido === "Confirmado" ? "text-blue-600" :
-                                                        p.estadoPedido === "EnReparto" ? "text-orange-600" :
-                                                            p.estadoPedido === "Entregado" ? "text-green-600" :
-                                                                "text-slate-500"
+                                                p.estadoPedido === "Confirmado" ? "text-blue-600" :
+                                                    p.estadoPedido === "EnReparto" ? "text-orange-600" :
+                                                        p.estadoPedido === "Entregado" ? "text-green-600" :
+                                                            "text-slate-500"
                                                 }`} />
                                         </div>
                                         <div className="min-w-0">
