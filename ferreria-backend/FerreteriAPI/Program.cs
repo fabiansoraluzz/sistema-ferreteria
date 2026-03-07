@@ -140,7 +140,7 @@ app.UseSwaggerUI(options =>
 
 // ── Middleware y pipeline ─────────────────────────────────────────────────────
 app.UseMiddleware<ManejoErroresMiddleware>();
-app.UseCors("PoliticaPrincipal");
+app.UseCors("AllowAll");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
