@@ -3,6 +3,15 @@
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
+import {
+    Home,
+    ClipboardList,
+    Package,
+    Users,
+    LogOut,
+    ShieldCheck,
+    DollarSign,
+} from "lucide-react";
 
 interface Usuario {
     id: number;
@@ -22,12 +31,10 @@ export default function DashboardLayout({
     useEffect(() => {
         const token = localStorage.getItem("token");
         const userData = localStorage.getItem("usuario");
-
         if (!token || !userData) {
             router.push("/login");
             return;
         }
-
         setUsuario(JSON.parse(userData));
     }, [router]);
 
@@ -38,65 +45,73 @@ export default function DashboardLayout({
     }
 
     const navItems = [
-        { href: "/inicio", label: "Inicio", icono: "🏠" },
-        { href: "/pedidos", label: "Pedidos", icono: "📋" },
-        { href: "/productos", label: "Mis Productos", icono: "📦" },
-        { href: "/clientes", label: "Clientes", icono: "👤" },
+        { href: "/inicio", label: "Inicio", icon: Home },
+        { href: "/pedidos", label: "Pedidos", icon: ClipboardList },
+        { href: "/productos", label: "Inventario", icon: Package },
+        { href: "/clientes", label: "Clientes", icon: Users },
+        { href: "/cobranza", label: "Cobranza", icon: DollarSign },
     ];
 
     if (!usuario) return null;
 
     return (
-        <div className="min-h-screen bg-gray-50 flex flex-col">
+        <div className="min-h-screen bg-slate-50 flex flex-col">
 
             {/* Header */}
-            <header className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between sticky top-0 z-10">
-                <h1 className="text-lg font-bold text-gray-900">🔧 Ferretería</h1>
-                <div className="flex items-center gap-3">
-                    <span className="text-sm text-gray-600 hidden sm:block">
-                        {usuario.nombreCompleto}
-                    </span>
+            <header className="bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between sticky top-0 z-10 shadow-sm">
+                <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                        <Package size={16} className="text-white" />
+                    </div>
+                    <span className="text-base font-bold text-slate-800">Ferretería</span>
+                </div>
+                <div className="flex items-center gap-2">
                     {usuario.rol === "Administrador" && (
                         <Link
                             href="/auditoria"
-                            className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full font-medium"
+                            className="flex items-center gap-1 text-xs bg-purple-100 text-purple-700 px-2.5 py-1.5 rounded-lg font-semibold"
                         >
+                            <ShieldCheck size={12} />
                             Admin
                         </Link>
                     )}
+                    <div className="hidden sm:block text-sm text-slate-500 font-medium">
+                        {usuario.nombreCompleto.split(" ")[0]}
+                    </div>
                     <button
                         onClick={cerrarSesion}
-                        className="text-sm text-red-500 hover:text-red-700 font-medium"
+                        className="flex items-center gap-1 text-slate-400 hover:text-red-500 transition-colors p-1.5 rounded-lg hover:bg-red-50"
                     >
-                        Salir
+                        <LogOut size={18} />
                     </button>
                 </div>
             </header>
 
             {/* Contenido */}
-            <main className="flex-1 pb-20 px-4 py-4 max-w-2xl mx-auto w-full">
+            <main className="flex-1 pb-24 px-4 py-5 max-w-2xl mx-auto w-full">
                 {children}
             </main>
 
-            {/* Barra de navegación inferior estilo WhatsApp */}
-            <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-10">
+            {/* Navbar inferior */}
+            <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 z-10 shadow-lg">
                 <div className="max-w-2xl mx-auto flex">
                     {navItems.map((item) => {
+                        const Icon = item.icon;
                         const activo = pathname === item.href ||
-                            pathname.startsWith(item.href + "/");
+                            (item.href !== "/inicio" && pathname.startsWith(item.href + "/"));
                         return (
                             <Link
                                 key={item.href}
                                 href={item.href}
-                                className={`flex-1 flex flex-col items-center py-2 gap-1 transition-colors ${activo
-                                        ? "text-blue-600"
-                                        : "text-gray-500 hover:text-gray-700"
+                                className={`flex-1 flex flex-col items-center py-3 gap-1 transition-colors ${activo ? "text-blue-600" : "text-slate-400 hover:text-slate-600"
                                     }`}
                             >
-                                <span className="text-xl">{item.icono}</span>
-                                <span className="text-xs font-medium">{item.label}</span>
+                                <Icon size={22} strokeWidth={activo ? 2.5 : 1.8} />
+                                <span className={`text-xs font-medium ${activo ? "text-blue-600" : "text-slate-400"}`}>
+                                    {item.label}
+                                </span>
                                 {activo && (
-                                    <div className="w-1 h-1 bg-blue-600 rounded-full" />
+                                    <div className="absolute bottom-0 w-8 h-0.5 bg-blue-600 rounded-t-full" />
                                 )}
                             </Link>
                         );
