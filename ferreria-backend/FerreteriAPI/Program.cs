@@ -70,12 +70,19 @@ var origenes = builder.Configuration["Cors:OrigenesPermitidos"]
     ?.Split(",", StringSplitOptions.RemoveEmptyEntries)
     ?? ["http://localhost:3000"];
 
-builder.Services.AddCors(opt =>
-    opt.AddPolicy("PoliticaPrincipal", p =>
-        p.WithOrigins(origenes)
-         .AllowAnyHeader()
-         .AllowAnyMethod()
-         .AllowCredentials()));
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.WithOrigins(
+            "http://localhost:3000",
+            "https://sistema-ferreteria-three.vercel.app"
+        )
+        .AllowAnyHeader()
+        .AllowAnyMethod()
+        .AllowCredentials();
+    });
+});
 
 // ── 7. Controladores ──────────────────────────────────────────────────────────
 builder.Services.AddControllers()
