@@ -1,33 +1,28 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
-    ArrowLeft,
-    Package,
-    Tag,
-    TrendingUp,
-    TrendingDown,
-    AlertTriangle,
-    CheckCircle,
-    XCircle,
-    Plus,
+    ArrowLeft, Package, Tag, TrendingUp, TrendingDown,
+    AlertTriangle, CheckCircle, XCircle, Plus,
 } from "lucide-react";
 import api from "@/lib/api";
 import { Producto } from "@/types";
+import { Alerta } from "@/components/ui/Alerta";
+import { ModalConfirmacion } from "@/components/ui/ModalConfirmacion";
+import { useAlerta } from "@/hooks/useAlerta";
 
 export default function DetalleProductoPage() {
     const params = useParams();
     const router = useRouter();
+    const alerta = useAlerta();
     const [producto, setProducto] = useState<Producto | null>(null);
     const [cargando, setCargando] = useState(true);
     const [cantidad, setCantidad] = useState("");
     const [motivo, setMotivo] = useState("");
     const [guardando, setGuardando] = useState(false);
-    const [mensaje, setMensaje] = useState("");
-    const [tipoMensaje, setTipoMensaje] = useState<"ok" | "error">("ok");
     const [mostrarForm, setMostrarForm] = useState(false);
-    const timerRef = useRef<NodeJS.Timeout | null>(null);
+    const [confirmarEntrada, setConfirmarEntrada] = useState(false);
 
     useEffect(() => {
         cargarProducto();
@@ -46,28 +41,22 @@ export default function DetalleProductoPage() {
         }
     }
 
-    function mostrarMensajeTemp(texto: string, tipo: "ok" | "error") {
-        setMensaje(texto);
-        setTipoMensaje(tipo);
-        if (timerRef.current) clearTimeout(timerRef.current);
-        timerRef.current = setTimeout(() => setMensaje(""), 5000);
-    }
-
     async function registrarEntrada() {
         if (!cantidad || parseFloat(cantidad) <= 0) return;
         setGuardando(true);
+        setConfirmarEntrada(false);
         try {
             await api.post(`/Productos/RegistrarEntradaMercaderia/${params.id}`, {
                 cantidad: parseFloat(cantidad),
                 motivo: motivo || "Entrada de mercadería",
             });
-            mostrarMensajeTemp("El stock se actualizó correctamente", "ok");
+            alerta.mostrar("El stock se actualizó correctamente", "ok");
             setCantidad("");
             setMotivo("");
             setMostrarForm(false);
             cargarProducto();
         } catch {
-            mostrarMensajeTemp("Hubo un error al registrar la entrada", "error");
+            alerta.mostrar("Hubo un error al registrar la entrada", "error");
         } finally {
             setGuardando(false);
         }
@@ -85,15 +74,11 @@ export default function DetalleProductoPage() {
     if (!producto) return null;
 
     const estadoStock = producto.stockActual === 0
-        ? "sinStock"
-        : producto.tieneStockBajo
-            ? "pocoStock"
-            : "ok";
+        ? "sinStock" : producto.tieneStockBajo ? "pocoStock" : "ok";
 
     return (
         <div className="space-y-5">
 
-            {/* Header */}
             <div className="flex items-center gap-3">
                 <button
                     onClick={() => router.back()}
@@ -107,36 +92,20 @@ export default function DetalleProductoPage() {
                 </div>
             </div>
 
-            {/* Mensaje */}
-            {mensaje && (
-                <div className={`flex items-center gap-3 rounded-2xl px-4 py-4 text-base font-semibold ${tipoMensaje === "ok"
-                        ? "bg-green-50 border-2 border-green-200 text-green-700"
-                        : "bg-red-50 border-2 border-red-200 text-red-700"
-                    }`}>
-                    {tipoMensaje === "ok"
-                        ? <CheckCircle size={22} />
-                        : <XCircle size={22} />
-                    }
-                    {mensaje}
-                </div>
-            )}
+            <Alerta mensaje={alerta.mensaje} tipo={alerta.tipo} visible={alerta.visible} />
 
-            {/* Card de stock actual */}
             <div className={`rounded-2xl p-6 text-white shadow-sm ${estadoStock === "sinStock" ? "bg-red-500" :
-                    estadoStock === "pocoStock" ? "bg-orange-400" :
-                        "bg-green-500"
+                    estadoStock === "pocoStock" ? "bg-orange-400" : "bg-green-500"
                 }`}>
-                <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-2">
-                        {estadoStock === "sinStock" && <XCircle size={22} />}
-                        {estadoStock === "pocoStock" && <AlertTriangle size={22} />}
-                        {estadoStock === "ok" && <CheckCircle size={22} />}
-                        <p className="text-base font-semibold">
-                            {estadoStock === "sinStock" ? "Sin stock — necesita reabastecerse" :
-                                estadoStock === "pocoStock" ? "Poco stock — conviene reabastecer" :
-                                    "Stock suficiente"}
-                        </p>
-                    </div>
+                <div className="flex items-center gap-2 mb-4">
+                    {estadoStock === "sinStock" && <XCircle size={22} />}
+                    {estadoStock === "pocoStock" && <AlertTriangle size={22} />}
+                    {estadoStock === "ok" && <CheckCircle size={22} />}
+                    <p className="text-base font-semibold">
+                        {estadoStock === "sinStock" ? "Sin stock — necesita reabastecerse" :
+                            estadoStock === "pocoStock" ? "Poco stock — conviene reabastecer" :
+                                "Stock suficiente"}
+                    </p>
                 </div>
                 <div className="text-center">
                     <p className="text-8xl font-bold">{producto.stockActual}</p>
@@ -149,7 +118,6 @@ export default function DetalleProductoPage() {
                 </div>
             </div>
 
-            {/* Botón entró mercadería */}
             {!mostrarForm ? (
                 <button
                     onClick={() => setMostrarForm(true)}
@@ -160,9 +128,7 @@ export default function DetalleProductoPage() {
                 </button>
             ) : (
                 <div className="bg-white rounded-2xl border-2 border-blue-200 p-5 space-y-4 shadow-sm">
-                    <p className="text-lg font-bold text-slate-800">
-                        ¿Cuántas unidades entraron?
-                    </p>
+                    <p className="text-lg font-bold text-slate-800">¿Cuántas unidades entraron?</p>
                     <input
                         type="number"
                         value={cantidad}
@@ -181,27 +147,22 @@ export default function DetalleProductoPage() {
                     />
                     <div className="flex gap-3">
                         <button
-                            onClick={() => {
-                                setMostrarForm(false);
-                                setCantidad("");
-                                setMotivo("");
-                            }}
+                            onClick={() => { setMostrarForm(false); setCantidad(""); setMotivo(""); }}
                             className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-2xl py-4 text-base transition-colors"
                         >
                             Cancelar
                         </button>
                         <button
-                            onClick={registrarEntrada}
-                            disabled={guardando || !cantidad || parseFloat(cantidad) <= 0}
-                            className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 text-white font-bold rounded-2xl py-4 text-base transition-colors"
+                            onClick={() => setConfirmarEntrada(true)}
+                            disabled={!cantidad || parseFloat(cantidad) <= 0}
+                            className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold rounded-2xl py-4 text-base transition-colors"
                         >
-                            {guardando ? "Guardando..." : "Guardar"}
+                            Guardar
                         </button>
                     </div>
                 </div>
             )}
 
-            {/* Datos del producto */}
             <div>
                 <p className="text-lg font-bold text-slate-700 mb-3">Información del producto</p>
                 <div className="bg-white rounded-2xl border-2 border-slate-200 overflow-hidden shadow-sm">
@@ -245,6 +206,17 @@ export default function DetalleProductoPage() {
                     </div>
                 </div>
             </div>
+
+            <ModalConfirmacion
+                visible={confirmarEntrada}
+                titulo="¿Confirmas la entrada?"
+                descripcion={`Se agregarán ${cantidad} ${producto.unidadMedida} al stock de "${producto.nombre}"`}
+                textoConfirmar="Sí, registrar"
+                colorConfirmar="azul"
+                cargando={guardando}
+                onCancelar={() => setConfirmarEntrada(false)}
+                onConfirmar={registrarEntrada}
+            />
 
         </div>
     );
