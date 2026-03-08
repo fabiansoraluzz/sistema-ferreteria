@@ -67,7 +67,7 @@ public class ProductoService : IProductoService
             Descripcion = request.Descripcion?.Trim(),
             CategoriaId = request.CategoriaId,
             UnidadMedida = request.UnidadMedida.Trim(),
-            StockActual = request.StockActual,
+            StockActual = request.StockInicial,
             StockMinimo = request.StockMinimo,
             PrecioCompra = request.PrecioCompra,
             PrecioVenta = request.PrecioVenta,
@@ -80,15 +80,15 @@ public class ProductoService : IProductoService
         await _db.SaveChangesAsync(); // ← Primero guarda para obtener el Id
 
         // Ahora que el producto tiene Id registramos el movimiento
-        if (request.StockActual > 0)
+        if (request.StockInicial > 0)
         {
             _db.MovimientosStock.Add(new MovimientoStock
             {
                 ProductoId = producto.Id, // ← Ahora sí tiene Id real
                 TipoMovimiento = "Entrada",
-                Cantidad = request.StockActual,
+                Cantidad = request.StockInicial,
                 StockAnterior = 0,
-                StockResultante = request.StockActual,
+                StockResultante = request.StockInicial,
                 Motivo = "Stock inicial al crear producto",
                 CreadoPor = usuarioId,
                 CreadoEn = DateTime.UtcNow,

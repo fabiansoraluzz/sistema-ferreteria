@@ -2,28 +2,28 @@
 
 public record CrearClienteRequest(
     string NombreCompleto,
-    string Telefono,
+    string? Telefono,
     string? CorreoElectronico,
     string? Direccion,
     string? Distrito,
-    string? TipoDocumento,
-    string? NumeroDocumento
+    string TipoDocumento,
+    string NumeroDocumento
 );
 
 public record ActualizarClienteRequest(
     string NombreCompleto,
-    string Telefono,
+    string? Telefono,
     string? CorreoElectronico,
     string? Direccion,
     string? Distrito,
-    string? TipoDocumento,
-    string? NumeroDocumento
+    string TipoDocumento,
+    string NumeroDocumento
 );
 
 public record ClienteResponse(
     int Id,
     string NombreCompleto,
-    string Telefono,
+    string? Telefono,
     string? CorreoElectronico,
     string? Direccion,
     string? Distrito,
@@ -34,7 +34,6 @@ public record ClienteResponse(
     DateTime CreadoEn
 );
 
-// ── Detalle de deuda por pedido ───────────────────────────────────────────────
 public record DeudaPedidoDetalle(
     int PedidoId,
     DateTime FechaPedido,
@@ -48,7 +47,7 @@ public record DeudaPedidoDetalle(
 public record ClienteDetalleResponse(
     int Id,
     string NombreCompleto,
-    string Telefono,
+    string? Telefono,
     string? CorreoElectronico,
     string? Direccion,
     string? Distrito,

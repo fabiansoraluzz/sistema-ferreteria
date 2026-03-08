@@ -52,7 +52,7 @@ public class ClienteService : IClienteService
         var cliente = new Cliente
         {
             NombreCompleto = request.NombreCompleto.Trim(),
-            Telefono = request.Telefono.Trim(),
+            Telefono = request.Telefono?.Trim() ?? "",
             CorreoElectronico = request.CorreoElectronico?.Trim(),
             Direccion = request.Direccion?.Trim(),
             Distrito = request.Distrito?.Trim(),
@@ -77,7 +77,7 @@ public class ClienteService : IClienteService
             ?? throw new KeyNotFoundException($"Cliente {id} no encontrado.");
 
         cliente.NombreCompleto = request.NombreCompleto.Trim();
-        cliente.Telefono = request.Telefono.Trim();
+        cliente.Telefono = request.Telefono?.Trim() ?? "";
         cliente.CorreoElectronico = request.CorreoElectronico?.Trim();
         cliente.Direccion = request.Direccion?.Trim();
         cliente.Distrito = request.Distrito?.Trim();

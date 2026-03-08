@@ -5,7 +5,7 @@ public record CrearProductoRequest(
     string? Descripcion,
     int CategoriaId,
     string UnidadMedida,
-    decimal StockActual,
+    decimal StockInicial,
     decimal StockMinimo,
     decimal PrecioCompra,
     decimal PrecioVenta
