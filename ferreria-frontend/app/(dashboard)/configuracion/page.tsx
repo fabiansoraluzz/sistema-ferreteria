@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, ShieldCheck, Users, ChevronRight, Lock } from "lucide-react";
+import { ArrowLeft, ShieldCheck, Users, ChevronRight } from "lucide-react";
 
 export default function ConfiguracionPage() {
     const router = useRouter();
