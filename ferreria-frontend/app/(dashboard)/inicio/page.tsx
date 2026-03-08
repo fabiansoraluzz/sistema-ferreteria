@@ -128,18 +128,18 @@ export default function InicioPage() {
                                             </div>
                                             <div className="text-right">
                                                 <p className={`text-3xl font-bold ${p.stockActual === 0
-                                                        ? "text-red-600"
-                                                        : p.tieneStockBajo
-                                                            ? "text-orange-500"
-                                                            : "text-green-600"
+                                                    ? "text-red-600"
+                                                    : p.tieneStockBajo
+                                                        ? "text-orange-500"
+                                                        : "text-green-600"
                                                     }`}>
                                                     {p.stockActual}
                                                 </p>
                                                 <p className={`text-sm font-semibold ${p.stockActual === 0
-                                                        ? "text-red-500"
-                                                        : p.tieneStockBajo
-                                                            ? "text-orange-500"
-                                                            : "text-green-500"
+                                                    ? "text-red-500"
+                                                    : p.tieneStockBajo
+                                                        ? "text-orange-500"
+                                                        : "text-green-500"
                                                     }`}>
                                                     {p.stockActual === 0
                                                         ? "Sin stock"
@@ -384,7 +384,7 @@ export default function InicioPage() {
                                 {dashboard?.pedidosPendientesHoy ?? 0}
                             </p>
                             <p className="text-base text-slate-500 mt-1">
-                                Pedidos esperando atención
+                                Esperando atención
                             </p>
                         </div>
                     </Link>
@@ -398,7 +398,7 @@ export default function InicioPage() {
                                 {dashboard?.ultimosPedidos?.length ?? 0}
                             </p>
                             <p className="text-base text-slate-500 mt-1">
-                                Pedidos recientes
+                                Recientes
                             </p>
                         </div>
                     </Link>
@@ -424,10 +424,10 @@ export default function InicioPage() {
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <span className={`text-sm px-3 py-1 rounded-full font-semibold ${pedido.estadoPedido === "Pendiente" ? "bg-amber-100 text-amber-700" :
-                                                pedido.estadoPedido === "Confirmado" ? "bg-blue-100 text-blue-700" :
-                                                    pedido.estadoPedido === "EnReparto" ? "bg-orange-100 text-orange-700" :
-                                                        pedido.estadoPedido === "Entregado" ? "bg-green-100 text-green-700" :
-                                                            "bg-red-100 text-red-700"
+                                            pedido.estadoPedido === "Confirmado" ? "bg-blue-100 text-blue-700" :
+                                                pedido.estadoPedido === "EnReparto" ? "bg-orange-100 text-orange-700" :
+                                                    pedido.estadoPedido === "Entregado" ? "bg-green-100 text-green-700" :
+                                                        "bg-red-100 text-red-700"
                                             }`}>
                                             {pedido.estadoPedido === "EnReparto" ? "En Reparto" : pedido.estadoPedido}
                                         </span>

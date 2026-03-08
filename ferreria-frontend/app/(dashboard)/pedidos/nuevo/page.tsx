@@ -203,7 +203,7 @@ export default function NuevoPedidoPage() {
                                     >
                                         <div>
                                             <p className="text-base font-semibold text-slate-800">{c.nombreCompleto}</p>
-                                            <p className="text-sm text-slate-500">{c.telefono}</p>
+                                            <p className="text-sm text-slate-500">{c.numeroDocumento}</p>
                                         </div>
                                         <div className="flex items-center gap-2">
                                             {c.deudaTotal > 0 ? (
@@ -267,8 +267,8 @@ export default function NuevoPedidoPage() {
                                     key={cat}
                                     onClick={() => setCategoriaFiltro(cat)}
                                     className={`shrink-0 text-sm px-4 py-2 rounded-xl font-semibold transition-colors border-2 ${categoriaFiltro === cat
-                                            ? "bg-blue-600 border-blue-600 text-white"
-                                            : "bg-white border-slate-200 text-slate-600 hover:border-blue-300"
+                                        ? "bg-blue-600 border-blue-600 text-white"
+                                        : "bg-white border-slate-200 text-slate-600 hover:border-blue-300"
                                         }`}
                                 >
                                     {cat}
@@ -458,7 +458,7 @@ export default function NuevoPedidoPage() {
 
             <ModalConfirmacion
                 visible={confirmarSalir}
-                titulo="Salir sin guardar?"
+                titulo="¿Salir sin guardar?"
                 descripcion="El pedido que estas creando se perdera. Esta accion no se puede deshacer."
                 textoConfirmar="Si, salir"
                 colorConfirmar="rojo"

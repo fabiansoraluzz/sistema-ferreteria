@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Search, Package, AlertTriangle, CheckCircle, Plus, ChevronRight } from "lucide-react";
+import { Search, Package, AlertTriangle, CheckCircle, Plus, ChevronRight, Tag } from "lucide-react";
 import api from "@/lib/api";
 import { Producto } from "@/types";
 import { normalizar } from "@/lib/utils";
@@ -57,15 +57,24 @@ export default function ProductosPage() {
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-2xl font-bold text-slate-800">Inventario</h1>
-                    <p className="text-base text-slate-500">{productos.length} productos en total</p>
+                    <p className="text-base text-slate-500">{productos.length} productos registrados</p>
                 </div>
-                <Link
-                    href="/productos/nuevo"
-                    className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-3 rounded-xl shadow-sm transition-colors"
-                >
-                    <Plus size={20} />
-                    <span className="text-base">Nuevo</span>
-                </Link>
+                <div className="flex gap-2">
+                    <Link
+                        href="/categorias"
+                        className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-4 py-3 rounded-xl transition-colors"
+                    >
+                        <Tag size={20} />
+                        <span className="text-base">Categorías</span>
+                    </Link>
+                    <Link
+                        href="/productos/nuevo"
+                        className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-3 rounded-xl shadow-sm transition-colors"
+                    >
+                        <Plus size={20} />
+                        <span className="text-base">Nuevo</span>
+                    </Link>
+                </div>
             </div>
 
             {/* Buscador */}
@@ -85,8 +94,8 @@ export default function ProductosPage() {
                 <button
                     onClick={() => setFiltro(filtro === "sinStock" ? "todos" : "sinStock")}
                     className={`rounded-2xl p-3 text-center border-2 transition-all ${filtro === "sinStock"
-                            ? "bg-red-500 border-red-500 text-white shadow-md"
-                            : "bg-red-50 border-red-200 text-red-700"
+                        ? "bg-red-500 border-red-500 text-white shadow-md"
+                        : "bg-red-50 border-red-200 text-red-700"
                         }`}
                 >
                     <p className="text-2xl font-bold">{sinStock}</p>
@@ -95,8 +104,8 @@ export default function ProductosPage() {
                 <button
                     onClick={() => setFiltro(filtro === "pocoStock" ? "todos" : "pocoStock")}
                     className={`rounded-2xl p-3 text-center border-2 transition-all ${filtro === "pocoStock"
-                            ? "bg-orange-400 border-orange-400 text-white shadow-md"
-                            : "bg-orange-50 border-orange-200 text-orange-700"
+                        ? "bg-orange-400 border-orange-400 text-white shadow-md"
+                        : "bg-orange-50 border-orange-200 text-orange-700"
                         }`}
                 >
                     <p className="text-2xl font-bold">{pocoStock}</p>
@@ -105,8 +114,8 @@ export default function ProductosPage() {
                 <button
                     onClick={() => setFiltro(filtro === "ok" ? "todos" : "ok")}
                     className={`rounded-2xl p-3 text-center border-2 transition-all ${filtro === "ok"
-                            ? "bg-green-500 border-green-500 text-white shadow-md"
-                            : "bg-green-50 border-green-200 text-green-700"
+                        ? "bg-green-500 border-green-500 text-white shadow-md"
+                        : "bg-green-50 border-green-200 text-green-700"
                         }`}
                 >
                     <p className="text-2xl font-bold">{conStock}</p>
@@ -131,10 +140,10 @@ export default function ProductosPage() {
                             >
                                 <div className="flex items-center gap-3 flex-1 min-w-0">
                                     <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${p.stockActual === 0
-                                            ? "bg-red-100"
-                                            : p.tieneStockBajo
-                                                ? "bg-orange-100"
-                                                : "bg-green-100"
+                                        ? "bg-red-100"
+                                        : p.tieneStockBajo
+                                            ? "bg-orange-100"
+                                            : "bg-green-100"
                                         }`}>
                                         {p.stockActual === 0
                                             ? <Package size={20} className="text-red-600" />
@@ -151,10 +160,10 @@ export default function ProductosPage() {
                                 <div className="flex items-center gap-3 shrink-0 ml-2">
                                     <div className="text-right">
                                         <p className={`text-xl font-bold ${p.stockActual === 0
-                                                ? "text-red-600"
-                                                : p.tieneStockBajo
-                                                    ? "text-orange-500"
-                                                    : "text-green-600"
+                                            ? "text-red-600"
+                                            : p.tieneStockBajo
+                                                ? "text-orange-500"
+                                                : "text-green-600"
                                             }`}>
                                             {p.stockActual}
                                         </p>

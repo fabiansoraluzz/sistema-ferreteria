@@ -29,8 +29,10 @@ export default function ClientesPage() {
     }
 
     const clientesFiltrados = clientes.filter((c) => {
-        const coincide = normalizar(c.nombreCompleto).includes(normalizar(busqueda)) ||
-            c.telefono.includes(busqueda);
+        const coincide =
+            normalizar(c.nombreCompleto).includes(normalizar(busqueda)) ||
+            c.telefono.includes(busqueda) ||
+            (c.numeroDocumento ?? "").includes(busqueda);
         if (!coincide) return false;
         if (filtro === "conDeuda") return c.deudaTotal > 0;
         if (filtro === "alDia") return c.deudaTotal === 0;
@@ -53,7 +55,6 @@ export default function ClientesPage() {
     return (
         <div className="space-y-5">
 
-            {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-2xl font-bold text-slate-800">Clientes</h1>
@@ -68,7 +69,6 @@ export default function ClientesPage() {
                 </Link>
             </div>
 
-            {/* Resumen de deudas */}
             {conDeuda.length > 0 && (
                 <div className="bg-red-50 border-2 border-red-200 rounded-2xl p-4">
                     <p className="text-base font-bold text-red-700">
@@ -80,25 +80,23 @@ export default function ClientesPage() {
                 </div>
             )}
 
-            {/* Buscador */}
             <div className="relative">
                 <Search size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                 <input
                     type="text"
                     value={busqueda}
                     onChange={(e) => setBusqueda(e.target.value)}
-                    placeholder="Buscar por nombre o teléfono..."
+                    placeholder="Buscar por nombre, documento o teléfono..."
                     className="w-full bg-white border-2 border-slate-200 rounded-2xl pl-12 pr-4 py-4 text-lg text-slate-800 placeholder-slate-400 focus:outline-none focus:border-blue-400 shadow-sm transition-all"
                 />
             </div>
 
-            {/* Filtros */}
             <div className="grid grid-cols-3 gap-2">
                 <button
                     onClick={() => setFiltro("todos")}
                     className={`rounded-2xl p-3 text-center border-2 transition-all ${filtro === "todos"
-                        ? "bg-blue-600 border-blue-600 text-white shadow-md"
-                        : "bg-blue-50 border-blue-200 text-blue-700"
+                            ? "bg-blue-600 border-blue-600 text-white shadow-md"
+                            : "bg-blue-50 border-blue-200 text-blue-700"
                         }`}
                 >
                     <p className="text-2xl font-bold">{clientes.length}</p>
@@ -107,8 +105,8 @@ export default function ClientesPage() {
                 <button
                     onClick={() => setFiltro(filtro === "conDeuda" ? "todos" : "conDeuda")}
                     className={`rounded-2xl p-3 text-center border-2 transition-all ${filtro === "conDeuda"
-                        ? "bg-red-500 border-red-500 text-white shadow-md"
-                        : "bg-red-50 border-red-200 text-red-700"
+                            ? "bg-red-500 border-red-500 text-white shadow-md"
+                            : "bg-red-50 border-red-200 text-red-700"
                         }`}
                 >
                     <p className="text-2xl font-bold">{conDeuda.length}</p>
@@ -117,8 +115,8 @@ export default function ClientesPage() {
                 <button
                     onClick={() => setFiltro(filtro === "alDia" ? "todos" : "alDia")}
                     className={`rounded-2xl p-3 text-center border-2 transition-all ${filtro === "alDia"
-                        ? "bg-green-500 border-green-500 text-white shadow-md"
-                        : "bg-green-50 border-green-200 text-green-700"
+                            ? "bg-green-500 border-green-500 text-white shadow-md"
+                            : "bg-green-50 border-green-200 text-green-700"
                         }`}
                 >
                     <p className="text-2xl font-bold">{alDia.length}</p>
@@ -126,7 +124,6 @@ export default function ClientesPage() {
                 </button>
             </div>
 
-            {/* Lista */}
             <div className="bg-white rounded-2xl border-2 border-slate-200 overflow-hidden shadow-sm">
                 {clientesFiltrados.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-12 gap-3">
@@ -153,7 +150,11 @@ export default function ClientesPage() {
                                         <p className="text-base font-semibold text-slate-800 truncate">
                                             {c.nombreCompleto}
                                         </p>
-                                        <p className="text-sm text-slate-400">{c.telefono}</p>
+                                        <p className="text-sm text-slate-400">
+                                            {c.tipoDocumento && c.numeroDocumento
+                                                ? `${c.tipoDocumento}: ${c.numeroDocumento}`
+                                                : c.telefono}
+                                        </p>
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-2 shrink-0 ml-2">
