@@ -133,8 +133,9 @@ export default function DetalleProductoPage() {
                         onClick={() => setMostrarForm(true)}
                         className="w-full flex items-center justify-center gap-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-2xl py-5 text-lg shadow-sm transition-colors"
                     >
-                        <Package size={24} />
-                        Entró mercadería — registrar cantidad
+                        <Package size={24} className="shrink-0" />
+                        <span className="sm:hidden">Registrar entrada</span>
+                        <span className="hidden sm:inline">Entró mercadería — registrar cantidad</span>
                     </button>
                 ) : (
                     <div className="bg-white rounded-2xl border-2 border-blue-200 p-5 space-y-4 shadow-sm">

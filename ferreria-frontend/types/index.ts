@@ -194,3 +194,13 @@ export interface LogAuditoria {
     direccionIP?: string;
     creadoEn: string;
 }
+
+// ── Usuarios ──────────────────────────────────────────────────────────────────
+export interface UsuarioSistema {
+    id: number;
+    nombreCompleto: string;
+    correoElectronico: string;
+    rol: string;
+    estaActivo: boolean;
+    creadoEn: string;
+}

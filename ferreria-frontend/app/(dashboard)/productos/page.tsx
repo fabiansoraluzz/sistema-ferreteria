@@ -54,25 +54,25 @@ export default function ProductosPage() {
         <div className="space-y-5">
 
             {/* Header */}
-            <div className="flex items-center justify-between">
-                <div>
+            <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0">
                     <h1 className="text-2xl font-bold text-slate-800">Inventario</h1>
                     <p className="text-base text-slate-500">{productos.length} productos registrados</p>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-2 shrink-0">
                     <Link
                         href="/categorias"
-                        className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-4 py-3 rounded-xl transition-colors"
+                        className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-3 py-3 rounded-xl transition-colors"
                     >
                         <Tag size={20} />
-                        <span className="text-base">Categorías</span>
+                        <span className="text-base hidden sm:inline">Categorías</span>
                     </Link>
                     <Link
                         href="/productos/nuevo"
-                        className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-3 rounded-xl shadow-sm transition-colors"
+                        className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold px-3 py-3 rounded-xl shadow-sm transition-colors"
                     >
                         <Plus size={20} />
-                        <span className="text-base">Nuevo</span>
+                        <span className="text-base hidden sm:inline">Nuevo</span>
                     </Link>
                 </div>
             </div>

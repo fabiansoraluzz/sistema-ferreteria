@@ -4,13 +4,8 @@ import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import {
-    Home,
-    ClipboardList,
-    Package,
-    Users,
-    LogOut,
-    ShieldCheck,
-    DollarSign,
+    Home, ClipboardList, Package, Users,
+    LogOut, DollarSign, Settings,
 } from "lucide-react";
 
 interface Usuario {
@@ -19,11 +14,7 @@ interface Usuario {
     rol: string;
 }
 
-export default function DashboardLayout({
-    children,
-}: {
-    children: React.ReactNode;
-}) {
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
     const router = useRouter();
     const pathname = usePathname();
     const [usuario, setUsuario] = useState<Usuario | null>(null);
@@ -31,10 +22,7 @@ export default function DashboardLayout({
     useEffect(() => {
         const token = localStorage.getItem("token");
         const userData = localStorage.getItem("usuario");
-        if (!token || !userData) {
-            router.push("/login");
-            return;
-        }
+        if (!token || !userData) { router.push("/login"); return; }
         setUsuario(JSON.parse(userData));
     }, [router]);
 
@@ -57,7 +45,6 @@ export default function DashboardLayout({
     return (
         <div className="min-h-screen bg-slate-50 flex flex-col">
 
-            {/* Header */}
             <header className="bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between sticky top-0 z-10 shadow-sm">
                 <div className="flex items-center gap-2">
                     <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
@@ -66,18 +53,20 @@ export default function DashboardLayout({
                     <span className="text-base font-bold text-slate-800">Ferretería</span>
                 </div>
                 <div className="flex items-center gap-2">
-                    {usuario.rol === "Administrador" && (
-                        <Link
-                            href="/auditoria"
-                            className="flex items-center gap-1 text-xs bg-purple-100 text-purple-700 px-2.5 py-1.5 rounded-lg font-semibold"
-                        >
-                            <ShieldCheck size={12} />
-                            Admin
-                        </Link>
-                    )}
                     <div className="hidden sm:block text-sm text-slate-500 font-medium">
                         {usuario.nombreCompleto.split(" ")[0]}
                     </div>
+                    {usuario.rol === "Administrador" && (
+                        <Link
+                            href="/configuracion"
+                            className={`p-1.5 rounded-lg transition-colors ${pathname.startsWith("/configuracion") || pathname.startsWith("/auditoria")
+                                    ? "text-blue-600 bg-blue-50"
+                                    : "text-slate-400 hover:text-slate-600 hover:bg-slate-100"
+                                }`}
+                        >
+                            <Settings size={20} />
+                        </Link>
+                    )}
                     <button
                         onClick={cerrarSesion}
                         className="flex items-center gap-1 text-slate-400 hover:text-red-500 transition-colors p-1.5 rounded-lg hover:bg-red-50"
@@ -87,12 +76,10 @@ export default function DashboardLayout({
                 </div>
             </header>
 
-            {/* Contenido */}
             <main className="flex-1 pb-24 px-4 py-5 max-w-2xl mx-auto w-full">
                 {children}
             </main>
 
-            {/* Navbar inferior */}
             <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 z-10 shadow-lg">
                 <div className="max-w-2xl mx-auto flex">
                     {navItems.map((item) => {
