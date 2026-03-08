@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
     ArrowLeft,
@@ -9,7 +9,6 @@ import {
     MapPin,
     CreditCard,
     CheckCircle,
-    XCircle,
 } from "lucide-react";
 import api from "@/lib/api";
 import { Alerta } from "@/components/ui/Alerta";
@@ -138,8 +137,8 @@ export default function NuevoClientePage() {
                                 onChange={(e) => actualizar("nombreCompleto", e.target.value)}
                                 placeholder="Ej: García Torres Juan"
                                 className={`w-full border-2 rounded-xl px-4 py-3 text-base text-slate-800 placeholder-slate-400 focus:outline-none transition-all ${errores.nombreCompleto
-                                        ? "border-red-300 bg-red-50 focus:border-red-400"
-                                        : "border-slate-200 focus:border-blue-400"
+                                    ? "border-red-300 bg-red-50 focus:border-red-400"
+                                    : "border-slate-200 focus:border-blue-400"
                                     }`}
                             />
                             {errores.nombreCompleto ? (
@@ -161,8 +160,8 @@ export default function NuevoClientePage() {
                                 placeholder="Ej: 987654321"
                                 maxLength={9}
                                 className={`w-full border-2 rounded-xl px-4 py-3 text-base text-slate-800 placeholder-slate-400 focus:outline-none transition-all ${errores.telefono
-                                        ? "border-red-300 bg-red-50 focus:border-red-400"
-                                        : "border-slate-200 focus:border-blue-400"
+                                    ? "border-red-300 bg-red-50 focus:border-red-400"
+                                    : "border-slate-200 focus:border-blue-400"
                                     }`}
                             />
                             {errores.telefono ? (
@@ -233,8 +232,8 @@ export default function NuevoClientePage() {
                                     }
                                     maxLength={form.tipoDocumento === "DNI" ? 8 : 11}
                                     className={`w-full border-2 rounded-xl px-4 py-3 text-base text-slate-800 placeholder-slate-400 focus:outline-none transition-all ${errores.numeroDocumento
-                                            ? "border-red-300 bg-red-50 focus:border-red-400"
-                                            : "border-slate-200 focus:border-blue-400"
+                                        ? "border-red-300 bg-red-50 focus:border-red-400"
+                                        : "border-slate-200 focus:border-blue-400"
                                         }`}
                                 />
                                 {errores.numeroDocumento ? (

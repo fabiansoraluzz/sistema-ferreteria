@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
     ArrowLeft, Package, Tag, TrendingUp, TrendingDown,
@@ -183,8 +183,8 @@ export default function NuevoProductoPage() {
                                         key={u}
                                         onClick={() => actualizar("unidadMedida", u)}
                                         className={`py-3 rounded-xl text-base font-semibold border-2 transition-all capitalize ${form.unidadMedida === u
-                                                ? "bg-blue-600 border-blue-600 text-white shadow-sm"
-                                                : "bg-slate-50 border-slate-200 text-slate-700 hover:border-blue-300"
+                                            ? "bg-blue-600 border-blue-600 text-white shadow-sm"
+                                            : "bg-slate-50 border-slate-200 text-slate-700 hover:border-blue-300"
                                             }`}
                                     >
                                         {u}
