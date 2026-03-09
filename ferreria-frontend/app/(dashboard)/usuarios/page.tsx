@@ -11,6 +11,8 @@ import { UsuarioSistema } from "@/types";
 import { Alerta } from "@/components/ui/Alerta";
 import { ModalConfirmacion } from "@/components/ui/ModalConfirmacion";
 import { useAlerta } from "@/hooks/useAlerta";
+import { Paginacion } from "@/components/ui/Paginacion";
+const POR_PAGINA = 10;
 
 interface FormUsuario {
     nombreCompleto: string;
@@ -274,8 +276,8 @@ export default function UsuariosPage() {
                                         key={r}
                                         onClick={() => actualizar("rol", r)}
                                         className={`py-3 rounded-xl text-base font-semibold border-2 transition-all ${form.rol === r
-                                                ? "bg-blue-600 border-blue-600 text-white shadow-sm"
-                                                : "bg-slate-50 border-slate-200 text-slate-700 hover:border-blue-300"
+                                            ? "bg-blue-600 border-blue-600 text-white shadow-sm"
+                                            : "bg-slate-50 border-slate-200 text-slate-700 hover:border-blue-300"
                                             }`}
                                     >
                                         {r}
@@ -336,8 +338,8 @@ export default function UsuariosPage() {
                                         </button>
                                         <div className="flex items-center gap-2 shrink-0 ml-2">
                                             <span className={`text-xs px-2 py-1 rounded-lg font-semibold ${u.rol === "Administrador"
-                                                    ? "bg-purple-100 text-purple-700"
-                                                    : "bg-blue-100 text-blue-700"
+                                                ? "bg-purple-100 text-purple-700"
+                                                : "bg-blue-100 text-blue-700"
                                                 }`}>
                                                 {u.rol}
                                             </span>
@@ -423,8 +425,8 @@ export default function UsuariosPage() {
                                                             key={r}
                                                             onClick={() => actualizarEditar("rol", r)}
                                                             className={`py-3 rounded-xl text-base font-semibold border-2 transition-all ${formEditar.rol === r
-                                                                    ? "bg-blue-600 border-blue-600 text-white shadow-sm"
-                                                                    : "bg-white border-slate-200 text-slate-700 hover:border-blue-300"
+                                                                ? "bg-blue-600 border-blue-600 text-white shadow-sm"
+                                                                : "bg-white border-slate-200 text-slate-700 hover:border-blue-300"
                                                                 }`}
                                                         >
                                                             {r}

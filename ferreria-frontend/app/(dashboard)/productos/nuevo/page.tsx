@@ -22,24 +22,23 @@ interface FormProducto {
     stockMinimo: string;
 }
 
+const UNIDADES = ["unidad", "docena", "kilogramo", "millar", "juego"];
+
 export default function NuevoProductoPage() {
     const router = useRouter();
     const alerta = useAlerta();
 
     const [form, setForm] = useState<FormProducto>({
-        nombre: "",
-        categoriaId: "",
-        unidadMedida: "",
-        precioCompra: "",
-        precioVenta: "",
-        stockInicial: "",
-        stockMinimo: "",
+        nombre: "", categoriaId: "", unidadMedida: "",
+        precioCompra: "", precioVenta: "", stockInicial: "", stockMinimo: "",
     });
 
     const [categorias, setCategorias] = useState<Categoria[]>([]);
     const [guardando, setGuardando] = useState(false);
     const [errores, setErrores] = useState<Partial<FormProducto>>({});
     const [confirmarSalir, setConfirmarSalir] = useState(false);
+    const [mostrarExito, setMostrarExito] = useState(false);
+    const [idCreado, setIdCreado] = useState<number | null>(null);
 
     useEffect(() => {
         api.get<Categoria[]>("/Categorias/ObtenerCategorias").then(({ data }) => {
@@ -51,6 +50,11 @@ export default function NuevoProductoPage() {
     }, []);
 
     function actualizar(campo: keyof FormProducto, valor: string) {
+        // Solo permitir números y punto decimal en campos numéricos
+        const camposNumericos = ["precioCompra", "precioVenta", "stockInicial", "stockMinimo"];
+        if (camposNumericos.includes(campo)) {
+            valor = valor.replace(/[^0-9.]/g, "").replace(/(\..*)\./g, "$1");
+        }
         setForm(prev => ({ ...prev, [campo]: valor }));
         setErrores(prev => ({ ...prev, [campo]: "" }));
     }
@@ -59,11 +63,16 @@ export default function NuevoProductoPage() {
         const compra = parseFloat(form.precioCompra);
         const venta = parseFloat(form.precioVenta);
         if (!isNaN(compra) && !isNaN(venta) && compra > 0) {
-            const pct = ((venta - compra) / compra) * 100;
-            return pct.toFixed(1);
+            const diff = venta - compra;
+            const pct = (diff / compra) * 100;
+            return { pct: pct.toFixed(1), diff: diff.toFixed(2) };
         }
         return null;
     };
+
+    // Ganancia/pérdida en tiempo real según unidad
+    const calc = ganancia();
+    const unidadLabel = form.unidadMedida || "unidad";
 
     function validar(): boolean {
         const e: Partial<FormProducto> = {};
@@ -101,8 +110,6 @@ export default function NuevoProductoPage() {
             setGuardando(false);
         }
     }
-
-    const pct = ganancia();
 
     return (
         <>
@@ -178,7 +185,7 @@ export default function NuevoProductoPage() {
                                 <p className="text-base font-semibold text-slate-700">Unidad de medida</p>
                             </div>
                             <div className="grid grid-cols-3 gap-2">
-                                {["unidad", "docena", "kilogramo"].map(u => (
+                                {UNIDADES.map(u => (
                                     <button
                                         key={u}
                                         onClick={() => actualizar("unidadMedida", u)}
@@ -210,12 +217,11 @@ export default function NuevoProductoPage() {
                                 <p className="text-base font-semibold text-slate-700">Precio de compra (S/)</p>
                             </div>
                             <input
-                                type="number"
+                                type="text"
+                                inputMode="decimal"
                                 value={form.precioCompra}
                                 onChange={e => actualizar("precioCompra", e.target.value)}
                                 placeholder="0.00"
-                                min="0"
-                                step="0.01"
                                 className={`w-full border-2 rounded-xl px-4 py-3 text-base text-slate-800 placeholder-slate-400 focus:outline-none transition-all ${errores.precioCompra ? "border-red-300 bg-red-50" : "border-slate-200 focus:border-blue-400"
                                     }`}
                             />
@@ -230,25 +236,25 @@ export default function NuevoProductoPage() {
                                 <p className="text-base font-semibold text-slate-700">Precio de venta (S/)</p>
                             </div>
                             <input
-                                type="number"
+                                type="text"
+                                inputMode="decimal"
                                 value={form.precioVenta}
                                 onChange={e => actualizar("precioVenta", e.target.value)}
                                 placeholder="0.00"
-                                min="0"
-                                step="0.01"
                                 className={`w-full border-2 rounded-xl px-4 py-3 text-base text-slate-800 placeholder-slate-400 focus:outline-none transition-all ${errores.precioVenta ? "border-red-300 bg-red-50" : "border-slate-200 focus:border-blue-400"
                                     }`}
                             />
                             {errores.precioVenta && <p className="text-sm text-red-500 mt-1 font-medium">{errores.precioVenta}</p>}
                         </div>
 
-                        {pct !== null && (
-                            <div className={`px-4 py-4 ${parseFloat(pct) >= 0 ? "bg-green-50" : "bg-red-50"}`}>
-                                <p className={`text-base font-bold ${parseFloat(pct) >= 0 ? "text-green-700" : "text-red-700"}`}>
-                                    {parseFloat(pct) >= 0 ? "Ganancia" : "Pérdida"}: {pct}%
+                        {/* Cálculo en tiempo real */}
+                        {calc !== null && (
+                            <div className={`px-4 py-4 ${parseFloat(calc.pct) >= 0 ? "bg-green-50" : "bg-red-50"}`}>
+                                <p className={`text-base font-bold ${parseFloat(calc.pct) >= 0 ? "text-green-700" : "text-red-700"}`}>
+                                    {parseFloat(calc.pct) >= 0 ? "Ganancia" : "Pérdida"}: {calc.pct}%
                                 </p>
-                                <p className={`text-sm ${parseFloat(pct) >= 0 ? "text-green-600" : "text-red-600"}`}>
-                                    S/ {(parseFloat(form.precioVenta) - parseFloat(form.precioCompra)).toFixed(2)} por {form.unidadMedida || "unidad"}
+                                <p className={`text-sm ${parseFloat(calc.pct) >= 0 ? "text-green-600" : "text-red-600"}`}>
+                                    S/ {calc.diff} por {unidadLabel}
                                 </p>
                             </div>
                         )}
@@ -264,11 +270,11 @@ export default function NuevoProductoPage() {
                         <div className="px-4 py-4">
                             <p className="text-base font-semibold text-slate-700 mb-2">Stock inicial</p>
                             <input
-                                type="number"
+                                type="text"
+                                inputMode="decimal"
                                 value={form.stockInicial}
                                 onChange={e => actualizar("stockInicial", e.target.value)}
                                 placeholder="0"
-                                min="0"
                                 className={`w-full border-2 rounded-xl px-4 py-3 text-base text-slate-800 placeholder-slate-400 focus:outline-none transition-all ${errores.stockInicial ? "border-red-300 bg-red-50" : "border-slate-200 focus:border-blue-400"
                                     }`}
                             />
@@ -279,11 +285,11 @@ export default function NuevoProductoPage() {
                             <p className="text-base font-semibold text-slate-700 mb-1">Stock mínimo</p>
                             <p className="text-sm text-slate-400 mb-2">Se alertará cuando baje de este número</p>
                             <input
-                                type="number"
+                                type="text"
+                                inputMode="decimal"
                                 value={form.stockMinimo}
                                 onChange={e => actualizar("stockMinimo", e.target.value)}
                                 placeholder="5"
-                                min="0"
                                 className={`w-full border-2 rounded-xl px-4 py-3 text-base text-slate-800 placeholder-slate-400 focus:outline-none transition-all ${errores.stockMinimo ? "border-red-300 bg-red-50" : "border-slate-200 focus:border-blue-400"
                                     }`}
                             />
@@ -307,6 +313,18 @@ export default function NuevoProductoPage() {
                 </button>
 
             </div>
+
+            <ModalConfirmacion
+                visible={mostrarExito}
+                titulo="¡Producto guardado!"
+                descripcion="El producto se registró correctamente."
+                textoCancelar="Ver detalle"
+                textoConfirmar="Ir a inventario"
+                colorConfirmar="azul"
+                cargando={false}
+                onCancelar={() => { setMostrarExito(false); router.push(`/productos/${idCreado}`); }}
+                onConfirmar={() => { setMostrarExito(false); router.push("/productos"); }}
+            />
 
             <ModalConfirmacion
                 visible={confirmarSalir}

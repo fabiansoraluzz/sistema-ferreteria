@@ -9,6 +9,9 @@ import {
 import api from "@/lib/api";
 import { LogAuditoria } from "@/types";
 import { normalizar } from "@/lib/utils";
+import { Paginacion } from "@/components/ui/Paginacion";
+
+const POR_PAGINA = 10;
 
 function iconoAccion(accion: string) {
     if (accion === "CREAR") return <Plus size={16} className="text-green-600" />;
@@ -52,11 +55,10 @@ export default function AuditoriaPage() {
     const [logs, setLogs] = useState<LogAuditoria[]>([]);
     const [busqueda, setBusqueda] = useState("");
     const [cargando, setCargando] = useState(true);
+    const [pagina, setPagina] = useState(1);
 
-    useEffect(() => {
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        cargarLogs();
-    }, []);
+    useEffect(() => { cargarLogs(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    useEffect(() => { setPagina(1); }, [busqueda]);
 
     async function cargarLogs() {
         try {
@@ -75,6 +77,9 @@ export default function AuditoriaPage() {
         normalizar(l.accion).includes(normalizar(busqueda)) ||
         (l.descripcion && normalizar(l.descripcion).includes(normalizar(busqueda)))
     );
+
+    const totalPaginas = Math.ceil(logsFiltrados.length / POR_PAGINA);
+    const logsPagina = logsFiltrados.slice((pagina - 1) * POR_PAGINA, pagina * POR_PAGINA);
 
     if (cargando) {
         return (
@@ -119,34 +124,42 @@ export default function AuditoriaPage() {
                         <p className="text-base text-slate-500">No se encontraron registros</p>
                     </div>
                 ) : (
-                    <div className="divide-y divide-slate-100">
-                        {logsFiltrados.map((log) => (
-                            <div key={log.id} className="flex items-start gap-3 px-4 py-4">
-                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 mt-0.5 ${colorAccion(log.accion)}`}>
-                                    {iconoAccion(log.accion)}
+                    <>
+                        <div className="divide-y divide-slate-100">
+                            {logsPagina.map((log) => (
+                                <div key={log.id} className="flex items-start gap-3 px-4 py-4">
+                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 mt-0.5 ${colorAccion(log.accion)}`}>
+                                        {iconoAccion(log.accion)}
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-base font-semibold text-slate-800">
+                                            {log.nombreUsuario}{" "}
+                                            <span className="font-normal text-slate-600">
+                                                {etiquetaAccion(log.accion)} {etiquetaModulo(log.modulo)}
+                                            </span>
+                                        </p>
+                                        {log.descripcion && (
+                                            <p className="text-sm text-slate-400 mt-0.5 truncate">{log.descripcion}</p>
+                                        )}
+                                        <p className="text-xs text-slate-300 mt-1">
+                                            {new Date(log.creadoEn).toLocaleDateString("es-PE", {
+                                                day: "numeric", month: "short", year: "numeric",
+                                            })}{" "}
+                                            {new Date(log.creadoEn).toLocaleTimeString("es-PE", {
+                                                hour: "2-digit", minute: "2-digit",
+                                            })}
+                                        </p>
+                                    </div>
                                 </div>
-                                <div className="flex-1 min-w-0">
-                                    <p className="text-base font-semibold text-slate-800">
-                                        {log.nombreUsuario}{" "}
-                                        <span className="font-normal text-slate-600">
-                                            {etiquetaAccion(log.accion)} {etiquetaModulo(log.modulo)}
-                                        </span>
-                                    </p>
-                                    {log.descripcion && (
-                                        <p className="text-sm text-slate-400 mt-0.5 truncate">{log.descripcion}</p>
-                                    )}
-                                    <p className="text-xs text-slate-300 mt-1">
-                                        {new Date(log.creadoEn).toLocaleDateString("es-PE", {
-                                            day: "numeric", month: "short", year: "numeric",
-                                        })}{" "}
-                                        {new Date(log.creadoEn).toLocaleTimeString("es-PE", {
-                                            hour: "2-digit", minute: "2-digit",
-                                        })}
-                                    </p>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
+                            ))}
+                        </div>
+                        <div className="border-t border-slate-100 px-4 py-2">
+                            <p className="text-sm text-slate-400 text-center mb-1">
+                                {logsFiltrados.length} registros · página {pagina} de {totalPaginas}
+                            </p>
+                            <Paginacion paginaActual={pagina} totalPaginas={totalPaginas} onCambiar={setPagina} />
+                        </div>
+                    </>
                 )}
             </div>
 

@@ -3,12 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
-    ArrowLeft,
-    User,
-    Phone,
-    MapPin,
-    CreditCard,
-    CheckCircle,
+    ArrowLeft, User, Phone, MapPin, CreditCard, CheckCircle,
 } from "lucide-react";
 import api from "@/lib/api";
 import { Alerta } from "@/components/ui/Alerta";
@@ -18,22 +13,72 @@ import { useAlerta } from "@/hooks/useAlerta";
 interface FormCliente {
     nombreCompleto: string;
     telefono: string;
-    distrito: string;
+    provincia: string;
     tipoDocumento: string;
     numeroDocumento: string;
 }
 
-const DISTRITOS_LIMA = [
-    "Ate", "Barranco", "Breña", "Carabayllo", "Chaclacayo",
-    "Chorrillos", "Cieneguilla", "Comas", "El Agustino", "Independencia",
-    "Jesús María", "La Molina", "La Victoria", "Lince", "Los Olivos",
-    "Lurigancho", "Lurín", "Magdalena del Mar", "Miraflores", "Pachacámac",
-    "Pucusana", "Pueblo Libre", "Puente Piedra", "Punta Hermosa",
-    "Punta Negra", "Rímac", "San Bartolo", "San Borja", "San Isidro",
-    "San Juan de Lurigancho", "San Juan de Miraflores", "San Luis",
-    "San Martín de Porres", "San Miguel", "Santa Anita", "Santa María del Mar",
-    "Santa Rosa", "Santiago de Surco", "Surquillo", "Villa El Salvador",
-    "Villa María del Triunfo",
+const PROVINCIAS_PERU = [
+    "Callao",
+    // Amazonas
+    "Chachapoyas", "Bagua", "Bongará", "Condorcanqui", "Luya", "Rodríguez de Mendoza", "Utcubamba",
+    // Áncash
+    "Huaraz", "Aija", "Antonio Raymondi", "Asunción", "Bolognesi", "Carhuaz", "Carlos Fermín Fitzcarrald",
+    "Casma", "Corongo", "Huari", "Huarmey", "Huaylas", "Mariscal Luzuriaga", "Ocros", "Pallasca",
+    "Pomabamba", "Recuay", "Santa", "Sihuas", "Yungay",
+    // Apurímac
+    "Abancay", "Andahuaylas", "Antabamba", "Aymaraes", "Cotabambas", "Chincheros", "Grau",
+    // Arequipa
+    "Arequipa", "Camaná", "Caravelí", "Castilla", "Caylloma", "Condesuyos", "Islay", "La Unión",
+    // Ayacucho
+    "Huamanga", "Cangallo", "Huanca Sancos", "Huanta", "La Mar", "Lucanas", "Parinacochas",
+    "Páucar del Sara Sara", "Sucre", "Víctor Fajardo", "Vilcas Huamán",
+    // Cajamarca
+    "Cajamarca", "Cajabamba", "Celendín", "Chota", "Contumazá", "Cutervo", "Hualgayoc",
+    "Jaén", "San Ignacio", "San Marcos", "San Miguel", "San Pablo", "Santa Cruz",
+    // Cusco
+    "Cusco", "Acomayo", "Anta", "Calca", "Canas", "Canchis", "Chumbivilcas", "Espinar",
+    "La Convención", "Paruro", "Paucartambo", "Quispicanchi", "Urubamba",
+    // Huancavelica
+    "Huancavelica", "Acobamba", "Angaraes", "Castrovirreyna", "Churcampa", "Huaytará", "Tayacaja",
+    // Huánuco
+    "Huánuco", "Ambo", "Dos de Mayo", "Huacaybamba", "Huamalíes", "Leoncio Prado",
+    "Marañón", "Pachitea", "Puerto Inca", "Lauricocha", "Yarowilca",
+    // Ica
+    "Ica", "Chincha", "Nasca", "Palpa", "Pisco",
+    // Junín
+    "Huancayo", "Chanchamayo", "Chupaca", "Concepción", "Junín", "Satipo", "Tarma", "Yauli",
+    // La Libertad
+    "Trujillo", "Ascope", "Bolívar", "Chepén", "Julcán", "Otuzco", "Pacasmayo",
+    "Pataz", "Sánchez Carrión", "Santiago de Chuco", "Gran Chimú", "Virú",
+    // Lambayeque
+    "Chiclayo", "Ferreñafe", "Lambayeque",
+    // Lima
+    "Lima", "Barranca", "Cajatambo", "Canta", "Cañete", "Huaral", "Huarochirí",
+    "Huaura", "Oyón", "Yauyos",
+    // Loreto
+    "Maynas", "Alto Amazonas", "Datem del Marañón", "Loreto", "Mariscal Ramón Castilla",
+    "Putumayo", "Requena", "Ucayali",
+    // Madre de Dios
+    "Tambopata", "Manu", "Tahuamanu",
+    // Moquegua
+    "Mariscal Nieto", "General Sánchez Cerro", "Ilo",
+    // Pasco
+    "Pasco", "Daniel Alcides Carrión", "Oxapampa",
+    // Piura
+    "Piura", "Ayabaca", "Huancabamba", "Morropón", "Paita", "Sullana", "Talara", "Sechura",
+    // Puno
+    "Puno", "Azángaro", "Carabaya", "Chucuito", "El Collao", "Huancané", "Lampa",
+    "Melgar", "Moho", "San Antonio de Putina", "San Román", "Sandia", "Yunguyo",
+    // San Martín
+    "Moyobamba", "Bellavista", "El Dorado", "Huallaga", "Lamas", "Mariscal Cáceres",
+    "Picota", "Rioja", "San Martín", "Tocache",
+    // Tacna
+    "Tacna", "Candarave", "Jorge Basadre", "Tarata",
+    // Tumbes
+    "Tumbes", "Contralmirante Villar", "Zarumilla",
+    // Ucayali
+    "Coronel Portillo", "Atalaya", "Padre Abad", "Purús",
 ];
 
 export default function NuevoClientePage() {
@@ -42,14 +87,16 @@ export default function NuevoClientePage() {
     const [form, setForm] = useState<FormCliente>({
         nombreCompleto: "",
         telefono: "",
-        distrito: "",
-        tipoDocumento: "",
+        provincia: "",
+        tipoDocumento: "DNI",
         numeroDocumento: "",
     });
 
     const [guardando, setGuardando] = useState(false);
     const [errores, setErrores] = useState<Partial<FormCliente>>({});
     const [confirmarSalir, setConfirmarSalir] = useState(false);
+    const [mostrarExito, setMostrarExito] = useState(false);
+    const [idCreado, setIdCreado] = useState<number | null>(null);
     const alerta = useAlerta();
 
     useEffect(() => {
@@ -58,27 +105,27 @@ export default function NuevoClientePage() {
         return () => window.removeEventListener("beforeunload", handleBeforeUnload);
     }, []);
 
-    function handleVolver() {
-        setConfirmarSalir(true);
-    }
-
     function actualizar(campo: keyof FormCliente, valor: string) {
-        setForm((prev) => ({ ...prev, [campo]: valor }));
-        setErrores((prev) => ({ ...prev, [campo]: "" }));
+        setForm(prev => ({ ...prev, [campo]: valor }));
+        setErrores(prev => ({ ...prev, [campo]: "" }));
     }
 
     function validar(): boolean {
-        const nuevosErrores: Partial<FormCliente> = {};
+        const e: Partial<FormCliente> = {};
         if (!form.nombreCompleto.trim())
-            nuevosErrores.nombreCompleto = "El nombre es obligatorio";
-        if (!form.telefono.trim())
-            nuevosErrores.telefono = "El teléfono es obligatorio";
-        else if (!/^\d{9}$/.test(form.telefono.trim()))
-            nuevosErrores.telefono = "El teléfono debe tener 9 dígitos";
-        if (form.tipoDocumento && !form.numeroDocumento.trim())
-            nuevosErrores.numeroDocumento = "Ingresa el número de documento";
-        setErrores(nuevosErrores);
-        return Object.keys(nuevosErrores).length === 0;
+            e.nombreCompleto = "El nombre es obligatorio";
+        if (form.telefono && !/^\d{9}$/.test(form.telefono.trim()))
+            e.telefono = "El teléfono debe tener 9 dígitos";
+        if (!form.tipoDocumento)
+            e.tipoDocumento = "El tipo de documento es obligatorio";
+        if (!form.numeroDocumento.trim())
+            e.numeroDocumento = "El número de documento es obligatorio";
+        else if (form.tipoDocumento === "DNI" && !/^\d{8}$/.test(form.numeroDocumento))
+            e.numeroDocumento = "El DNI debe tener 8 dígitos";
+        else if (form.tipoDocumento === "RUC" && !/^\d{11}$/.test(form.numeroDocumento))
+            e.numeroDocumento = "El RUC debe tener 11 dígitos";
+        setErrores(e);
+        return Object.keys(e).length === 0;
     }
 
     async function guardar() {
@@ -87,10 +134,10 @@ export default function NuevoClientePage() {
         try {
             const { data } = await api.post("/Clientes/CrearCliente", {
                 nombreCompleto: form.nombreCompleto.trim(),
-                telefono: form.telefono.trim(),
-                distrito: form.distrito || null,
-                tipoDocumento: form.tipoDocumento || null,
-                numeroDocumento: form.numeroDocumento.trim() || null,
+                telefono: form.telefono.trim() || null,
+                distrito: form.provincia || null,
+                tipoDocumento: form.tipoDocumento,
+                numeroDocumento: form.numeroDocumento.trim(),
             });
             router.push(`/clientes/${data.id}`);
         } catch {
@@ -103,10 +150,9 @@ export default function NuevoClientePage() {
         <>
             <div className="space-y-5">
 
-                {/* Header */}
                 <div className="flex items-center gap-3">
                     <button
-                        onClick={handleVolver}
+                        onClick={() => setConfirmarSalir(true)}
                         className="w-10 h-10 flex items-center justify-center bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors"
                     >
                         <ArrowLeft size={20} className="text-slate-600" />
@@ -134,39 +180,55 @@ export default function NuevoClientePage() {
                             <input
                                 type="text"
                                 value={form.nombreCompleto}
-                                onChange={(e) => actualizar("nombreCompleto", e.target.value)}
+                                onChange={e => actualizar("nombreCompleto", e.target.value)}
                                 placeholder="Ej: García Torres Juan"
-                                className={`w-full border-2 rounded-xl px-4 py-3 text-base text-slate-800 placeholder-slate-400 focus:outline-none transition-all ${errores.nombreCompleto
-                                    ? "border-red-300 bg-red-50 focus:border-red-400"
-                                    : "border-slate-200 focus:border-blue-400"
+                                className={`w-full border-2 rounded-xl px-4 py-3 text-base text-slate-800 placeholder-slate-400 focus:outline-none transition-all ${errores.nombreCompleto ? "border-red-300 bg-red-50" : "border-slate-200 focus:border-blue-400"
                                     }`}
                             />
-                            {errores.nombreCompleto ? (
-                                <p className="text-sm text-red-500 mt-1 font-medium">{errores.nombreCompleto}</p>
-                            ) : null}
+                            {errores.nombreCompleto && <p className="text-sm text-red-500 mt-1 font-medium">{errores.nombreCompleto}</p>}
                         </div>
 
                         <div className="px-4 py-4">
                             <div className="flex items-center gap-3 mb-2">
-                                <div className="w-9 h-9 bg-green-100 rounded-xl flex items-center justify-center shrink-0">
-                                    <Phone size={18} className="text-green-600" />
+                                <div className="w-9 h-9 bg-purple-100 rounded-xl flex items-center justify-center shrink-0">
+                                    <CreditCard size={18} className="text-purple-600" />
                                 </div>
-                                <p className="text-base font-semibold text-slate-700">Teléfono celular</p>
+                                <p className="text-base font-semibold text-slate-700">Tipo de documento</p>
                             </div>
+                            <div className="grid grid-cols-3 gap-2">
+                                {["DNI", "RUC", "CE"].map(t => (
+                                    <button
+                                        key={t}
+                                        onClick={() => { actualizar("tipoDocumento", t); actualizar("numeroDocumento", ""); }}
+                                        className={`py-3 rounded-xl text-base font-semibold border-2 transition-all ${form.tipoDocumento === t
+                                            ? "bg-blue-600 border-blue-600 text-white shadow-sm"
+                                            : "bg-slate-50 border-slate-200 text-slate-700 hover:border-blue-300"
+                                            }`}
+                                    >
+                                        {t}
+                                    </button>
+                                ))}
+                            </div>
+                            {errores.tipoDocumento && <p className="text-sm text-red-500 mt-2 font-medium">{errores.tipoDocumento}</p>}
+                        </div>
+
+                        <div className="px-4 py-4">
+                            <p className="text-base font-semibold text-slate-700 mb-2">
+                                Número de {form.tipoDocumento}
+                            </p>
                             <input
-                                type="tel"
-                                value={form.telefono}
-                                onChange={(e) => actualizar("telefono", e.target.value.replace(/\D/g, ""))}
-                                placeholder="Ej: 987654321"
-                                maxLength={9}
-                                className={`w-full border-2 rounded-xl px-4 py-3 text-base text-slate-800 placeholder-slate-400 focus:outline-none transition-all ${errores.telefono
-                                    ? "border-red-300 bg-red-50 focus:border-red-400"
-                                    : "border-slate-200 focus:border-blue-400"
+                                type="text"
+                                value={form.numeroDocumento}
+                                onChange={e => actualizar("numeroDocumento", e.target.value.replace(/\D/g, ""))}
+                                placeholder={
+                                    form.tipoDocumento === "DNI" ? "8 dígitos" :
+                                        form.tipoDocumento === "RUC" ? "11 dígitos" : "Número de documento"
+                                }
+                                maxLength={form.tipoDocumento === "DNI" ? 8 : 11}
+                                className={`w-full border-2 rounded-xl px-4 py-3 text-base text-slate-800 placeholder-slate-400 focus:outline-none transition-all ${errores.numeroDocumento ? "border-red-300 bg-red-50" : "border-slate-200 focus:border-blue-400"
                                     }`}
                             />
-                            {errores.telefono ? (
-                                <p className="text-sm text-red-500 mt-1 font-medium">{errores.telefono}</p>
-                            ) : null}
+                            {errores.numeroDocumento && <p className="text-sm text-red-500 mt-1 font-medium">{errores.numeroDocumento}</p>}
                         </div>
 
                     </div>
@@ -180,72 +242,45 @@ export default function NuevoClientePage() {
 
                         <div className="px-4 py-4">
                             <div className="flex items-center gap-3 mb-2">
-                                <div className="w-9 h-9 bg-orange-100 rounded-xl flex items-center justify-center shrink-0">
-                                    <MapPin size={18} className="text-orange-600" />
+                                <div className="w-9 h-9 bg-green-100 rounded-xl flex items-center justify-center shrink-0">
+                                    <Phone size={18} className="text-green-600" />
                                 </div>
-                                <p className="text-base font-semibold text-slate-700">Distrito</p>
+                                <p className="text-base font-semibold text-slate-700">Teléfono celular</p>
                             </div>
-                            <select
-                                value={form.distrito}
-                                onChange={(e) => actualizar("distrito", e.target.value)}
-                                className="w-full border-2 border-slate-200 rounded-xl px-4 py-3 text-base text-slate-800 focus:outline-none focus:border-blue-400 transition-all bg-white"
-                            >
-                                <option value="">Sin distrito</option>
-                                {DISTRITOS_LIMA.map((d) => (
-                                    <option key={d} value={d}>{d}</option>
-                                ))}
-                            </select>
+                            <input
+                                type="text"
+                                value={form.telefono}
+                                onChange={e => actualizar("telefono", e.target.value.replace(/\D/g, ""))}
+                                placeholder="Ej: 987654321"
+                                maxLength={9}
+                                className={`w-full border-2 rounded-xl px-4 py-3 text-base text-slate-800 placeholder-slate-400 focus:outline-none transition-all ${errores.telefono ? "border-red-300 bg-red-50" : "border-slate-200 focus:border-blue-400"
+                                    }`}
+                            />
+                            {errores.telefono && <p className="text-sm text-red-500 mt-1 font-medium">{errores.telefono}</p>}
                         </div>
 
                         <div className="px-4 py-4">
                             <div className="flex items-center gap-3 mb-2">
-                                <div className="w-9 h-9 bg-purple-100 rounded-xl flex items-center justify-center shrink-0">
-                                    <CreditCard size={18} className="text-purple-600" />
+                                <div className="w-9 h-9 bg-orange-100 rounded-xl flex items-center justify-center shrink-0">
+                                    <MapPin size={18} className="text-orange-600" />
                                 </div>
-                                <p className="text-base font-semibold text-slate-700">Tipo de documento</p>
+                                <p className="text-base font-semibold text-slate-700">Provincia</p>
                             </div>
                             <select
-                                value={form.tipoDocumento}
-                                onChange={(e) => actualizar("tipoDocumento", e.target.value)}
+                                value={form.provincia}
+                                onChange={e => actualizar("provincia", e.target.value)}
                                 className="w-full border-2 border-slate-200 rounded-xl px-4 py-3 text-base text-slate-800 focus:outline-none focus:border-blue-400 transition-all bg-white"
                             >
-                                <option value="">Sin documento</option>
-                                <option value="DNI">DNI</option>
-                                <option value="RUC">RUC</option>
-                                <option value="CE">Carnet de Extranjería</option>
+                                <option value="">Sin provincia</option>
+                                {PROVINCIAS_PERU.map(p => (
+                                    <option key={p} value={p}>{p}</option>
+                                ))}
                             </select>
                         </div>
-
-                        {form.tipoDocumento ? (
-                            <div className="px-4 py-4">
-                                <p className="text-base font-semibold text-slate-700 mb-2">
-                                    Número de {form.tipoDocumento}
-                                </p>
-                                <input
-                                    type="text"
-                                    value={form.numeroDocumento}
-                                    onChange={(e) => actualizar("numeroDocumento", e.target.value.replace(/\D/g, ""))}
-                                    placeholder={
-                                        form.tipoDocumento === "DNI" ? "8 dígitos" :
-                                            form.tipoDocumento === "RUC" ? "11 dígitos" :
-                                                "Número de documento"
-                                    }
-                                    maxLength={form.tipoDocumento === "DNI" ? 8 : 11}
-                                    className={`w-full border-2 rounded-xl px-4 py-3 text-base text-slate-800 placeholder-slate-400 focus:outline-none transition-all ${errores.numeroDocumento
-                                        ? "border-red-300 bg-red-50 focus:border-red-400"
-                                        : "border-slate-200 focus:border-blue-400"
-                                        }`}
-                                />
-                                {errores.numeroDocumento ? (
-                                    <p className="text-sm text-red-500 mt-1 font-medium">{errores.numeroDocumento}</p>
-                                ) : null}
-                            </div>
-                        ) : null}
 
                     </div>
                 </div>
 
-                {/* Botón guardar */}
                 <button
                     onClick={guardar}
                     disabled={guardando}
@@ -260,6 +295,19 @@ export default function NuevoClientePage() {
                 </button>
 
             </div>
+
+            {/* Modal éxito */}
+            <ModalConfirmacion
+                visible={mostrarExito}
+                titulo="¡Cliente guardado!"
+                descripcion="El cliente se registró correctamente."
+                textoCancelar="Ver detalle"
+                textoConfirmar="Ir a clientes"
+                colorConfirmar="azul"
+                cargando={false}
+                onCancelar={() => { setMostrarExito(false); router.push(`/clientes/${idCreado}`); }}
+                onConfirmar={() => { setMostrarExito(false); router.push("/clientes"); }}
+            />
 
             <ModalConfirmacion
                 visible={confirmarSalir}

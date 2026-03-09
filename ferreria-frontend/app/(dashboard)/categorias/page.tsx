@@ -8,6 +8,9 @@ import { Categoria } from "@/types";
 import { Alerta } from "@/components/ui/Alerta";
 import { ModalConfirmacion } from "@/components/ui/ModalConfirmacion";
 import { useAlerta } from "@/hooks/useAlerta";
+import { Paginacion } from "@/components/ui/Paginacion";
+
+const POR_PAGINA = 10;
 
 export default function CategoriasPage() {
     const alerta = useAlerta();
@@ -20,8 +23,9 @@ export default function CategoriasPage() {
     const [errorNombre, setErrorNombre] = useState("");
     const [descripcion, setDescripcion] = useState("");
     const [categoriaAEliminar, setCategoriaAEliminar] = useState<Categoria | null>(null);
+    const [pagina, setPagina] = useState(1);
 
-    useEffect(() => { cargarCategorias(); }, []);
+    useEffect(() => { cargarCategorias(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     async function cargarCategorias() {
         try {
@@ -46,6 +50,7 @@ export default function CategoriasPage() {
             setNombre("");
             setDescripcion("");
             setMostrarForm(false);
+            setPagina(1);
             cargarCategorias();
         } catch {
             alerta.mostrar("Hubo un error al crear la categoría", "error");
@@ -81,6 +86,8 @@ export default function CategoriasPage() {
 
     const activas = categorias.filter(c => c.estaActivo);
     const inactivas = categorias.filter(c => !c.estaActivo);
+    const totalPaginas = Math.ceil(activas.length / POR_PAGINA);
+    const activasPagina = activas.slice((pagina - 1) * POR_PAGINA, pagina * POR_PAGINA);
 
     return (
         <>
@@ -153,29 +160,39 @@ export default function CategoriasPage() {
                             <p className="text-base text-slate-500">No hay categorías aún</p>
                         </div>
                     ) : (
-                        <div className="divide-y divide-slate-100">
-                            {activas.map((c) => (
-                                <div key={c.id} className="flex items-center justify-between px-4 py-4">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center shrink-0">
-                                            <Tag size={18} className="text-purple-600" />
+                        <>
+                            <div className="divide-y divide-slate-100">
+                                {activasPagina.map((c) => (
+                                    <div key={c.id} className="flex items-center justify-between px-4 py-4">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center shrink-0">
+                                                <Tag size={18} className="text-purple-600" />
+                                            </div>
+                                            <div>
+                                                <p className="text-base font-semibold text-slate-800">{c.nombre}</p>
+                                                {c.descripcion && (
+                                                    <p className="text-sm text-slate-400">{c.descripcion}</p>
+                                                )}
+                                            </div>
                                         </div>
-                                        <div>
-                                            <p className="text-base font-semibold text-slate-800">{c.nombre}</p>
-                                            {c.descripcion && (
-                                                <p className="text-sm text-slate-400">{c.descripcion}</p>
-                                            )}
-                                        </div>
+                                        <button
+                                            onClick={() => setCategoriaAEliminar(c)}
+                                            className="w-10 h-10 flex items-center justify-center text-red-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors"
+                                        >
+                                            <Trash2 size={18} />
+                                        </button>
                                     </div>
-                                    <button
-                                        onClick={() => setCategoriaAEliminar(c)}
-                                        className="w-10 h-10 flex items-center justify-center text-red-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors"
-                                    >
-                                        <Trash2 size={18} />
-                                    </button>
+                                ))}
+                            </div>
+                            {totalPaginas > 1 && (
+                                <div className="border-t border-slate-100 px-4 py-2">
+                                    <p className="text-sm text-slate-400 text-center mb-1">
+                                        {activas.length} categorías · página {pagina} de {totalPaginas}
+                                    </p>
+                                    <Paginacion paginaActual={pagina} totalPaginas={totalPaginas} onCambiar={setPagina} />
                                 </div>
-                            ))}
-                        </div>
+                            )}
+                        </>
                     )}
                 </div>
 
