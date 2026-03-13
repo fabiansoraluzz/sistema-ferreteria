@@ -10,4 +10,6 @@ public interface IPedidoService
     Task<PedidoResponse> CambiarEstadoAsync(int id, CambiarEstadoPedidoRequest request, int usuarioId);
     Task<PedidoResponse> CancelarAsync(int id, CancelarPedidoRequest request, int usuarioId);
     Task<DashboardResponse> ObtenerDashboardAsync();
+    Task<PedidoResponse> ActualizarDocumentoFiscalAsync(int id, ActualizarDocumentoFiscalRequest request, int usuarioId);
+
 }

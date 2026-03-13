@@ -70,4 +70,13 @@ public class PedidosController : ControllerBase
             ?? throw new UnauthorizedAccessException("Token inválido.");
         return int.Parse(claim);
     }
+
+    /// <summary>ActualizarDocumentoFiscal — Actualiza el tipo de documento fiscal del pedido: SinDocumento, SoloFactura o GuiaFactura.</summary>
+    [HttpPatch("ActualizarDocumentoFiscal/{id}")]
+    public async Task<IActionResult> ActualizarDocumentoFiscal(
+        int id, [FromBody] ActualizarDocumentoFiscalRequest request)
+    {
+        var pedido = await _service.ActualizarDocumentoFiscalAsync(id, request, ObtenerUsuarioId());
+        return Ok(pedido);
+    }
 }

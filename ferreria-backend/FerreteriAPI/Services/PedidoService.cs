@@ -11,7 +11,6 @@ public class PedidoService : IPedidoService
     private readonly AppDbContext _db;
     private const decimal IGV = 0.18m;
 
-    // Flujo de estados permitido — no se puede saltear ningún estado
     private static readonly Dictionary<string, string> _siguienteEstado = new()
     {
         { "Pendiente",  "Confirmado" },
@@ -44,6 +43,7 @@ public class PedidoService : IPedidoService
                 p.Id,
                 p.Cliente.NombreCompleto,
                 p.EstadoPedido,
+                p.TipoDocumentoFiscal,
                 p.Total,
                 p.Total - p.MontoPagado,
                 p.FechaPedido,
@@ -68,16 +68,13 @@ public class PedidoService : IPedidoService
     public async Task<PedidoResponse> CrearAsync(
         CrearPedidoRequest request, int usuarioId)
     {
-        // Valida que exista el cliente
         var cliente = await _db.Clientes
             .FirstOrDefaultAsync(c => c.Id == request.ClienteId && c.EstaActivo)
             ?? throw new InvalidOperationException("El cliente seleccionado no existe.");
 
-        // Valida que venga al menos un producto
         if (request.Detalles == null || request.Detalles.Count == 0)
             throw new InvalidOperationException("El pedido debe tener al menos un producto.");
 
-        // Valida productos y calcula subtotal
         var detalles = new List<DetallePedido>();
         decimal subtotal = 0;
 
@@ -99,7 +96,7 @@ public class PedidoService : IPedidoService
             {
                 ProductoId = producto.Id,
                 Cantidad = item.Cantidad,
-                PrecioUnitario = producto.PrecioVenta, // snapshot del precio actual
+                PrecioUnitario = producto.PrecioVenta,
                 Subtotal = subtotalItem,
                 CreadoPor = usuarioId,
                 CreadoEn = DateTime.UtcNow,
@@ -114,6 +111,7 @@ public class PedidoService : IPedidoService
         {
             ClienteId = request.ClienteId,
             EstadoPedido = "Pendiente",
+            TipoDocumentoFiscal = "SinDocumento",
             FechaPedido = DateTime.UtcNow,
             FechaEntrega = request.FechaEntrega,
             Observaciones = request.Observaciones?.Trim(),
@@ -130,7 +128,6 @@ public class PedidoService : IPedidoService
         _db.Pedidos.Add(pedido);
         await _db.SaveChangesAsync();
 
-        // Recarga con todas las relaciones para devolver la respuesta completa
         return await ObtenerPorIdAsync(pedido.Id);
     }
 
@@ -153,7 +150,6 @@ public class PedidoService : IPedidoService
             throw new InvalidOperationException(
                 "El pedido ya fue entregado y no puede cambiar de estado.");
 
-        // Valida que el nuevo estado sea el siguiente correcto en el flujo
         if (!_siguienteEstado.TryGetValue(pedido.EstadoPedido, out var estadoEsperado)
             || estadoEsperado != request.NuevoEstado)
         {
@@ -162,7 +158,6 @@ public class PedidoService : IPedidoService
                 $"El siguiente estado debe ser '{estadoEsperado}'.");
         }
 
-        // Al confirmar: descuenta el stock automáticamente
         if (request.NuevoEstado == "Confirmado")
             await DescontarStockAsync(pedido, usuarioId);
 
@@ -193,13 +188,36 @@ public class PedidoService : IPedidoService
             throw new InvalidOperationException(
                 "No se puede cancelar un pedido que ya fue entregado.");
 
-        // Si el pedido ya fue confirmado, repone el stock
         if (pedido.EstadoPedido == "Confirmado" ||
             pedido.EstadoPedido == "EnReparto")
             await ReponerStockAsync(pedido, request.Motivo, usuarioId);
 
         pedido.EstadoPedido = "Cancelado";
         pedido.Observaciones = $"{pedido.Observaciones} | CANCELADO: {request.Motivo}".Trim(' ', '|');
+        pedido.ModificadoPor = usuarioId;
+        pedido.ModificadoEn = DateTime.UtcNow;
+
+        await _db.SaveChangesAsync();
+
+        return ToResponse(pedido);
+    }
+
+    // ── Actualizar Documento Fiscal ───────────────────────────────────────────
+    public async Task<PedidoResponse> ActualizarDocumentoFiscalAsync(
+        int id, ActualizarDocumentoFiscalRequest request, int usuarioId)
+    {
+        var validos = new[] { "SinDocumento", "SoloFactura", "GuiaFactura" };
+        if (!validos.Contains(request.TipoDocumentoFiscal))
+            throw new InvalidOperationException("Tipo de documento fiscal no válido.");
+
+        var pedido = await _db.Pedidos
+            .Include(p => p.Cliente)
+            .Include(p => p.Detalles)
+                .ThenInclude(d => d.Producto)
+            .FirstOrDefaultAsync(p => p.Id == id && p.EstaActivo)
+            ?? throw new KeyNotFoundException($"Pedido {id} no encontrado.");
+
+        pedido.TipoDocumentoFiscal = request.TipoDocumentoFiscal;
         pedido.ModificadoPor = usuarioId;
         pedido.ModificadoEn = DateTime.UtcNow;
 
@@ -241,6 +259,7 @@ public class PedidoService : IPedidoService
                 p.Id,
                 p.Cliente.NombreCompleto,
                 p.EstadoPedido,
+                p.TipoDocumentoFiscal,
                 p.Total,
                 p.Total - p.MontoPagado,
                 p.FechaPedido,
@@ -328,6 +347,7 @@ public class PedidoService : IPedidoService
         p.Cliente?.NombreCompleto ?? "",
         p.Cliente?.Telefono ?? "",
         p.EstadoPedido,
+        p.TipoDocumentoFiscal,
         p.FechaPedido,
         p.FechaEntrega,
         p.Observaciones,

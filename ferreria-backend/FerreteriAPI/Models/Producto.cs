@@ -15,6 +15,7 @@
         public Categoria Categoria { get; set; } = null!;
         public ICollection<MovimientoStock> Movimientos { get; set; } = [];
         public ICollection<DetallePedido> DetallesPedido { get; set; } = [];
+        public ICollection<DetalleCompra> DetallesCompra { get; set; } = [];
     }
 
 }
