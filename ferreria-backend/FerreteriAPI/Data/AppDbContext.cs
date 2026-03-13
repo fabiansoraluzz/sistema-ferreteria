@@ -17,6 +17,9 @@ public class AppDbContext : DbContext
     public DbSet<Pago> Pagos => Set<Pago>();
     public DbSet<Despacho> Despachos => Set<Despacho>();
     public DbSet<LogAuditoria> LogsAuditoria => Set<LogAuditoria>();
+    public DbSet<Proveedor> Proveedores => Set<Proveedor>();
+    public DbSet<Compra> Compras => Set<Compra>();
+    public DbSet<DetalleCompra> DetallesCompra => Set<DetalleCompra>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -79,6 +82,7 @@ public class AppDbContext : DbContext
         {
             e.HasKey(p => p.Id);
             e.Property(p => p.EstadoPedido).HasMaxLength(30).IsRequired();
+            e.Property(p => p.TipoDocumentoFiscal).HasMaxLength(20).IsRequired();
             e.Property(p => p.Subtotal).HasColumnType("decimal(10,2)");
             e.Property(p => p.MontoImpuesto).HasColumnType("decimal(10,2)");
             e.Property(p => p.Total).HasColumnType("decimal(10,2)");
@@ -124,6 +128,11 @@ public class AppDbContext : DbContext
              .HasForeignKey(m => m.PedidoId)
              .IsRequired(false)
              .OnDelete(DeleteBehavior.SetNull);
+            e.HasOne(m => m.Compra)
+             .WithMany(c => c.MovimientosStock)
+             .HasForeignKey(m => m.CompraId)
+             .IsRequired(false)
+             .OnDelete(DeleteBehavior.SetNull);
         });
 
         // ── Pagos ─────────────────────────────────────────────────────────
@@ -165,6 +174,45 @@ public class AppDbContext : DbContext
             e.Property(l => l.Accion).HasMaxLength(50).IsRequired();
             e.Property(l => l.Modulo).HasMaxLength(50).IsRequired();
             e.Property(l => l.DireccionIP).HasMaxLength(45);
+        });
+
+        // ── Proveedor ─────────────────────────────────────────────────────
+        modelBuilder.Entity<Proveedor>(e =>
+        {
+            e.HasKey(p => p.Id);
+            e.Property(p => p.Nombre).HasMaxLength(150).IsRequired();
+            e.Property(p => p.Ruc).HasMaxLength(20);
+            e.Property(p => p.Telefono).HasMaxLength(20);
+            e.Property(p => p.Direccion).HasMaxLength(255);
+        });
+
+        // ── Compra ────────────────────────────────────────────────────────
+        modelBuilder.Entity<Compra>(e =>
+        {
+            e.HasKey(c => c.Id);
+            e.Property(c => c.NumeroFactura).HasMaxLength(50).IsRequired();
+            e.Property(c => c.Total).HasColumnType("decimal(10,2)");
+            e.Property(c => c.Observaciones).HasMaxLength(255);
+            e.HasIndex(c => new { c.ProveedorId, c.NumeroFactura }).IsUnique();
+            e.HasOne(c => c.Proveedor)
+             .WithMany(p => p.Compras)
+             .HasForeignKey(c => c.ProveedorId)
+             .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // ── DetalleCompra ─────────────────────────────────────────────────
+        modelBuilder.Entity<DetalleCompra>(e =>
+        {
+            e.HasKey(d => d.Id);
+            e.Property(d => d.Cantidad).HasColumnType("decimal(10,2)");
+            e.HasOne(d => d.Compra)
+             .WithMany(c => c.Detalles)
+             .HasForeignKey(d => d.CompraId)
+             .OnDelete(DeleteBehavior.Cascade);
+            e.HasOne(d => d.Producto)
+             .WithMany(p => p.DetallesCompra)
+             .HasForeignKey(d => d.ProductoId)
+             .OnDelete(DeleteBehavior.Restrict);
         });
     }
 }

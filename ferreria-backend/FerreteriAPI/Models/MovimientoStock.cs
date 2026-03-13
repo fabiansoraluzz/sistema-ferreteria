@@ -10,7 +10,9 @@
         public decimal StockResultante { get; set; }
         public string? Motivo { get; set; }
         public int? PedidoId { get; set; }
+        public int? CompraId { get; set; }
 
+        public Compra? Compra { get; set; }
         public Producto Producto { get; set; } = null!;
         public Pedido? Pedido { get; set; }
     }

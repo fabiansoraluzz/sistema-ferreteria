@@ -1,29 +1,25 @@
 ﻿namespace FerreteriAPI.DTOs.Pedidos;
-
 // ── Entrada ───────────────────────────────────────────────────────────────────
-
 public record CrearDetallePedidoRequest(
     int ProductoId,
     decimal Cantidad
 );
-
 public record CrearPedidoRequest(
     int ClienteId,
     DateTime? FechaEntrega,
     string? Observaciones,
     List<CrearDetallePedidoRequest> Detalles
 );
-
 public record CambiarEstadoPedidoRequest(
     string NuevoEstado
 );
-
 public record CancelarPedidoRequest(
     string Motivo
 );
-
+public record ActualizarDocumentoFiscalRequest(
+    string TipoDocumentoFiscal
+);
 // ── Salida ────────────────────────────────────────────────────────────────────
-
 public record DetalleItemResponse(
     int Id,
     int ProductoId,
@@ -33,13 +29,13 @@ public record DetalleItemResponse(
     decimal PrecioUnitario,
     decimal Subtotal
 );
-
 public record PedidoResponse(
     int Id,
     int ClienteId,
     string NombreCliente,
     string TelefonoCliente,
     string EstadoPedido,
+    string TipoDocumentoFiscal,
     DateTime FechaPedido,
     DateTime? FechaEntrega,
     string? Observaciones,
@@ -52,19 +48,17 @@ public record PedidoResponse(
     bool EstaActivo,
     DateTime CreadoEn
 );
-
 public record PedidoResumenResponse(
     int Id,
     string NombreCliente,
     string EstadoPedido,
+    string TipoDocumentoFiscal,
     decimal Total,
     decimal SaldoPendiente,
     DateTime FechaPedido,
     DateTime? FechaEntrega
 );
-
 // ── Dashboard ─────────────────────────────────────────────────────────────────
-
 public record DashboardResponse(
     int ProductosConStockBajo,
     int PedidosPendientesHoy,

@@ -7,6 +7,7 @@ namespace FerreteriAPI.Models
         public int Id { get; set; }
         public int ClienteId { get; set; }
         public string EstadoPedido { get; set; } = "Pendiente";
+        public string TipoDocumentoFiscal { get; set; } = "SinDocumento";
         public DateTime FechaPedido { get; set; } = DateTime.UtcNow;
         public DateTime? FechaEntrega { get; set; }
         public string? Observaciones { get; set; }
@@ -14,7 +15,6 @@ namespace FerreteriAPI.Models
         public decimal MontoImpuesto { get; set; }
         public decimal Total { get; set; }
         public decimal MontoPagado { get; set; }
-
         public Cliente Cliente { get; set; } = null!;
         public ICollection<DetallePedido> Detalles { get; set; } = [];
         public ICollection<Pago> Pagos { get; set; } = [];
