@@ -22,7 +22,6 @@ export default function DetalleProveedorPage() {
     const [cargando, setCargando] = useState(true);
     const [editando, setEditando] = useState(false);
     const [guardando, setGuardando] = useState(false);
-    const [usuario, setUsuario] = useState<{ rol: string } | null>(null);
 
     const [nombre, setNombre] = useState("");
     const [ruc, setRuc] = useState("");
@@ -30,8 +29,6 @@ export default function DetalleProveedorPage() {
     const [direccion, setDireccion] = useState("");
 
     useEffect(() => {
-        const u = localStorage.getItem("usuario");
-        if (u) setUsuario(JSON.parse(u));
         cargar();
     }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
