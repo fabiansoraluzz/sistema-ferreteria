@@ -2,13 +2,15 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Search, Package, AlertTriangle, CheckCircle, Plus, ChevronRight, Tag } from "lucide-react";
+import {
+    Search, Package, AlertTriangle, CheckCircle,
+    Plus, ChevronRight, Tag, ShoppingCart,
+} from "lucide-react";
 import api from "@/lib/api";
 import { Producto } from "@/types";
 import { normalizar } from "@/lib/utils";
 import { Paginacion } from "@/components/ui/Paginacion";
-
-const POR_PAGINA = 10;
+import { usePorPagina } from "@/hooks/usePorPagina";
 
 export default function ProductosPage() {
     const [productos, setProductos] = useState<Producto[]>([]);
@@ -16,11 +18,10 @@ export default function ProductosPage() {
     const [filtro, setFiltro] = useState<"todos" | "sinStock" | "pocoStock" | "ok">("todos");
     const [cargando, setCargando] = useState(true);
     const [pagina, setPagina] = useState(1);
+    const [porPagina, setPorPagina] = usePorPagina();
 
-    useEffect(() => { cargarProductos(); }, []);
-
-    // Reset página al cambiar búsqueda o filtro
-    useEffect(() => { setPagina(1); }, [busqueda, filtro]);
+    useEffect(() => { cargarProductos(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    useEffect(() => { setPagina(1); }, [busqueda, filtro, porPagina]);
 
     async function cargarProductos() {
         try {
@@ -42,8 +43,8 @@ export default function ProductosPage() {
         return true;
     });
 
-    const totalPaginas = Math.ceil(productosFiltrados.length / POR_PAGINA);
-    const productosPagina = productosFiltrados.slice((pagina - 1) * POR_PAGINA, pagina * POR_PAGINA);
+    const totalPaginas = Math.ceil(productosFiltrados.length / porPagina);
+    const productosPagina = productosFiltrados.slice((pagina - 1) * porPagina, pagina * porPagina);
 
     const sinStock = productos.filter(p => p.stockActual === 0).length;
     const pocoStock = productos.filter(p => p.tieneStockBajo && p.stockActual > 0).length;
@@ -67,11 +68,24 @@ export default function ProductosPage() {
                     <p className="text-base text-slate-500">{productos.length} productos registrados</p>
                 </div>
                 <div className="flex gap-2 shrink-0">
-                    <Link href="/categorias" className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-3 py-3 rounded-xl transition-colors">
+                    <Link
+                        href="/compras"
+                        className="flex items-center gap-2 bg-orange-50 hover:bg-orange-100 text-orange-600 font-bold px-3 py-3 rounded-xl transition-colors border-2 border-orange-200"
+                    >
+                        <ShoppingCart size={20} />
+                        <span className="text-base hidden sm:inline">Compras</span>
+                    </Link>
+                    <Link
+                        href="/categorias"
+                        className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-3 py-3 rounded-xl transition-colors"
+                    >
                         <Tag size={20} />
                         <span className="text-base hidden sm:inline">Categorías</span>
                     </Link>
-                    <Link href="/productos/nuevo" className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold px-3 py-3 rounded-xl shadow-sm transition-colors">
+                    <Link
+                        href="/productos/nuevo"
+                        className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold px-3 py-3 rounded-xl shadow-sm transition-colors"
+                    >
                         <Plus size={20} />
                         <span className="text-base hidden sm:inline">Nuevo</span>
                     </Link>
@@ -98,7 +112,8 @@ export default function ProductosPage() {
                     <button
                         key={f.key}
                         onClick={() => setFiltro(filtro === f.key ? "todos" : f.key as typeof filtro)}
-                        className={`rounded-2xl p-3 text-center border-2 transition-all ${filtro === f.key ? f.activo : f.inactivo}`}
+                        className={`rounded-2xl p-3 text-center border-2 transition-all ${filtro === f.key ? f.activo : f.inactivo
+                            }`}
                     >
                         <p className="text-2xl font-bold">{f.count}</p>
                         <p className="text-xs font-semibold mt-0.5 leading-tight">{f.label}</p>
@@ -116,9 +131,15 @@ export default function ProductosPage() {
                     <>
                         <div className="divide-y divide-slate-100">
                             {productosPagina.map((p) => (
-                                <Link key={p.id} href={`/productos/${p.id}`} className="flex items-center justify-between px-4 py-4 hover:bg-slate-50 transition-colors">
+                                <Link
+                                    key={p.id}
+                                    href={`/productos/${p.id}`}
+                                    className="flex items-center justify-between px-4 py-4 hover:bg-slate-50 transition-colors"
+                                >
                                     <div className="flex items-center gap-3 flex-1 min-w-0">
-                                        <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${p.stockActual === 0 ? "bg-red-100" : p.tieneStockBajo ? "bg-orange-100" : "bg-green-100"}`}>
+                                        <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${p.stockActual === 0 ? "bg-red-100" :
+                                                p.tieneStockBajo ? "bg-orange-100" : "bg-green-100"
+                                            }`}>
                                             {p.stockActual === 0
                                                 ? <Package size={20} className="text-red-600" />
                                                 : p.tieneStockBajo
@@ -132,7 +153,9 @@ export default function ProductosPage() {
                                     </div>
                                     <div className="flex items-center gap-3 shrink-0 ml-2">
                                         <div className="text-right">
-                                            <p className={`text-xl font-bold ${p.stockActual === 0 ? "text-red-600" : p.tieneStockBajo ? "text-orange-500" : "text-green-600"}`}>
+                                            <p className={`text-xl font-bold ${p.stockActual === 0 ? "text-red-600" :
+                                                    p.tieneStockBajo ? "text-orange-500" : "text-green-600"
+                                                }`}>
                                                 {p.stockActual}
                                             </p>
                                             <p className="text-xs text-slate-400">{p.unidadMedida}</p>
@@ -142,12 +165,15 @@ export default function ProductosPage() {
                                 </Link>
                             ))}
                         </div>
-                        <div className="border-t border-slate-100 px-4 py-2">
-                            <p className="text-sm text-slate-400 text-center mb-1">
-                                {productosFiltrados.length} productos · página {pagina} de {totalPaginas}
-                            </p>
-                            <Paginacion paginaActual={pagina} totalPaginas={totalPaginas} onCambiar={setPagina} />
-                        </div>
+
+                        <Paginacion
+                            paginaActual={pagina}
+                            totalPaginas={totalPaginas}
+                            totalRegistros={productosFiltrados.length}
+                            porPagina={porPagina}
+                            onCambiarPagina={setPagina}
+                            onCambiarPorPagina={setPorPagina}
+                        />
                     </>
                 )}
             </div>

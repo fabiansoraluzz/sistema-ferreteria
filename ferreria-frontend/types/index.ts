@@ -94,6 +94,7 @@ export interface Pedido {
     nombreCliente: string;
     telefonoCliente: string;
     estadoPedido: string;
+    tipoDocumentoFiscal: string;
     fechaPedido: string;
     fechaEntrega?: string;
     observaciones?: string;
@@ -111,6 +112,7 @@ export interface PedidoResumen {
     id: number;
     nombreCliente: string;
     estadoPedido: string;
+    tipoDocumentoFiscal: string;
     total: number;
     saldoPendiente: number;
     fechaPedido: string;
@@ -202,5 +204,48 @@ export interface UsuarioSistema {
     correoElectronico: string;
     rol: string;
     estaActivo: boolean;
+    creadoEn: string;
+}
+
+// ── Proveedores ───────────────────────────────────────────────────────────────
+export interface Proveedor {
+    id: number;
+    nombre: string;
+    ruc?: string;
+    telefono?: string;
+    direccion?: string;
+    totalCompras: number;
+    estaActivo: boolean;
+    creadoEn: string;
+}
+
+// ── Compras ───────────────────────────────────────────────────────────────────
+export interface DetalleCompraItem {
+    id: number;
+    productoId: number;
+    nombreProducto: string;
+    unidadMedida: string;
+    cantidad: number;
+}
+
+export interface Compra {
+    id: number;
+    proveedorId: number;
+    nombreProveedor: string;
+    numeroFactura: string;
+    fechaCompra: string;
+    observaciones?: string;
+    total: number;
+    detalles: DetalleCompraItem[];
+    creadoEn: string;
+}
+
+export interface CompraResumen {
+    id: number;
+    nombreProveedor: string;
+    numeroFactura: string;
+    fechaCompra: string;
+    cantidadProductos: number;
+    total: number;
     creadoEn: string;
 }
