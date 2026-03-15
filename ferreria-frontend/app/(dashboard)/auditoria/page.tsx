@@ -10,8 +10,7 @@ import api from "@/lib/api";
 import { LogAuditoria } from "@/types";
 import { normalizar } from "@/lib/utils";
 import { Paginacion } from "@/components/ui/Paginacion";
-
-const POR_PAGINA = 10;
+import { usePorPagina } from "@/hooks/usePorPagina";
 
 function iconoAccion(accion: string) {
     if (accion === "CREAR") return <Plus size={16} className="text-green-600" />;
@@ -56,9 +55,10 @@ export default function AuditoriaPage() {
     const [busqueda, setBusqueda] = useState("");
     const [cargando, setCargando] = useState(true);
     const [pagina, setPagina] = useState(1);
+    const [porPagina, setPorPagina] = usePorPagina();
 
     useEffect(() => { cargarLogs(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
-    useEffect(() => { setPagina(1); }, [busqueda]);
+    useEffect(() => { setPagina(1); }, [busqueda, porPagina]);
 
     async function cargarLogs() {
         try {
@@ -78,8 +78,8 @@ export default function AuditoriaPage() {
         (l.descripcion && normalizar(l.descripcion).includes(normalizar(busqueda)))
     );
 
-    const totalPaginas = Math.ceil(logsFiltrados.length / POR_PAGINA);
-    const logsPagina = logsFiltrados.slice((pagina - 1) * POR_PAGINA, pagina * POR_PAGINA);
+    const totalPaginas = Math.ceil(logsFiltrados.length / porPagina);
+    const logsPagina = logsFiltrados.slice((pagina - 1) * porPagina, pagina * porPagina);
 
     if (cargando) {
         return (
@@ -153,12 +153,14 @@ export default function AuditoriaPage() {
                                 </div>
                             ))}
                         </div>
-                        <div className="border-t border-slate-100 px-4 py-2">
-                            <p className="text-sm text-slate-400 text-center mb-1">
-                                {logsFiltrados.length} registros · página {pagina} de {totalPaginas}
-                            </p>
-                            <Paginacion paginaActual={pagina} totalPaginas={totalPaginas} onCambiar={setPagina} />
-                        </div>
+                        <Paginacion
+                            paginaActual={pagina}
+                            totalPaginas={totalPaginas}
+                            totalRegistros={logsFiltrados.length}
+                            porPagina={porPagina}
+                            onCambiarPagina={setPagina}
+                            onCambiarPorPagina={setPorPagina}
+                        />
                     </>
                 )}
             </div>

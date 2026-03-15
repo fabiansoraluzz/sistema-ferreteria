@@ -12,7 +12,7 @@ import { Alerta } from "@/components/ui/Alerta";
 import { ModalConfirmacion } from "@/components/ui/ModalConfirmacion";
 import { useAlerta } from "@/hooks/useAlerta";
 import { Paginacion } from "@/components/ui/Paginacion";
-const POR_PAGINA = 10;
+import { usePorPagina } from "@/hooks/usePorPagina";
 
 interface FormUsuario {
     nombreCompleto: string;
@@ -40,23 +40,19 @@ export default function UsuariosPage() {
     const [usuarioEditando, setUsuarioEditando] = useState<number | null>(null);
     const [errores, setErrores] = useState<Partial<FormUsuario>>({});
     const [erroresEditar, setErroresEditar] = useState<Partial<FormEditar>>({});
+    const [pagina, setPagina] = useState(1);
+    const [porPagina, setPorPagina] = usePorPagina();
 
     const [form, setForm] = useState<FormUsuario>({
-        nombreCompleto: "",
-        correoElectronico: "",
-        contrasena: "",
-        rol: "Vendedor",
+        nombreCompleto: "", correoElectronico: "", contrasena: "", rol: "Vendedor",
     });
 
     const [formEditar, setFormEditar] = useState<FormEditar>({
-        nombreCompleto: "",
-        correoElectronico: "",
-        nuevaContrasena: "",
-        rol: "Vendedor",
+        nombreCompleto: "", correoElectronico: "", nuevaContrasena: "", rol: "Vendedor",
     });
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    useEffect(() => { cargarUsuarios(); }, []);
+    useEffect(() => { cargarUsuarios(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    useEffect(() => { setPagina(1); }, [porPagina]);
 
     async function cargarUsuarios() {
         try {
@@ -81,12 +77,7 @@ export default function UsuariosPage() {
 
     function abrirEditar(u: UsuarioSistema) {
         setUsuarioEditando(u.id);
-        setFormEditar({
-            nombreCompleto: u.nombreCompleto,
-            correoElectronico: u.correoElectronico,
-            nuevaContrasena: "",
-            rol: u.rol,
-        });
+        setFormEditar({ nombreCompleto: u.nombreCompleto, correoElectronico: u.correoElectronico, nuevaContrasena: "", rol: u.rol });
         setErroresEditar({});
         setMostrarForm(false);
     }
@@ -100,8 +91,7 @@ export default function UsuariosPage() {
         const e: Partial<FormUsuario> = {};
         if (!form.nombreCompleto.trim()) e.nombreCompleto = "El nombre es obligatorio";
         if (!form.correoElectronico.trim()) e.correoElectronico = "El correo es obligatorio";
-        else if (!/\S+@\S+\.\S+/.test(form.correoElectronico))
-            e.correoElectronico = "El correo no es válido";
+        else if (!/\S+@\S+\.\S+/.test(form.correoElectronico)) e.correoElectronico = "El correo no es válido";
         if (!form.contrasena.trim()) e.contrasena = "La contraseña es obligatoria";
         else if (form.contrasena.length < 6) e.contrasena = "Mínimo 6 caracteres";
         setErrores(e);
@@ -112,10 +102,8 @@ export default function UsuariosPage() {
         const e: Partial<FormEditar> = {};
         if (!formEditar.nombreCompleto.trim()) e.nombreCompleto = "El nombre es obligatorio";
         if (!formEditar.correoElectronico.trim()) e.correoElectronico = "El correo es obligatorio";
-        else if (!/\S+@\S+\.\S+/.test(formEditar.correoElectronico))
-            e.correoElectronico = "El correo no es válido";
-        if (formEditar.nuevaContrasena && formEditar.nuevaContrasena.length < 6)
-            e.nuevaContrasena = "Mínimo 6 caracteres";
+        else if (!/\S+@\S+\.\S+/.test(formEditar.correoElectronico)) e.correoElectronico = "El correo no es válido";
+        if (formEditar.nuevaContrasena && formEditar.nuevaContrasena.length < 6) e.nuevaContrasena = "Mínimo 6 caracteres";
         setErroresEditar(e);
         return Object.keys(e).length === 0;
     }
@@ -186,6 +174,9 @@ export default function UsuariosPage() {
         );
     }
 
+    const totalPaginas = Math.ceil(usuarios.length / porPagina);
+    const usuariosPagina = usuarios.slice((pagina - 1) * porPagina, pagina * porPagina);
+
     return (
         <>
             <div className="space-y-5">
@@ -212,7 +203,6 @@ export default function UsuariosPage() {
 
                 <Alerta mensaje={alerta.mensaje} tipo={alerta.tipo} visible={alerta.visible} />
 
-                {/* Formulario nuevo usuario */}
                 {mostrarForm && (
                     <div className="bg-white rounded-2xl border-2 border-blue-200 p-5 space-y-4 shadow-sm">
                         <p className="text-lg font-bold text-slate-800">Nuevo usuario</p>
@@ -304,7 +294,6 @@ export default function UsuariosPage() {
                     </div>
                 )}
 
-                {/* Lista de usuarios */}
                 <div className="bg-white rounded-2xl border-2 border-slate-200 overflow-hidden shadow-sm">
                     {usuarios.length === 0 ? (
                         <div className="flex flex-col items-center justify-center py-12 gap-3">
@@ -312,150 +301,148 @@ export default function UsuariosPage() {
                             <p className="text-base text-slate-500">No hay usuarios registrados</p>
                         </div>
                     ) : (
-                        <div className="divide-y divide-slate-100">
-                            {usuarios.map((u) => (
-                                <div key={u.id}>
-
-                                    {/* Fila del usuario */}
-                                    <div className="flex items-center justify-between px-4 py-4">
-                                        <button
-                                            onClick={() => usuarioEditando === u.id ? cerrarEditar() : abrirEditar(u)}
-                                            className="flex items-center gap-3 flex-1 min-w-0 text-left"
-                                        >
-                                            <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${u.rol === "Administrador" ? "bg-purple-100" : "bg-blue-100"
-                                                }`}>
-                                                {u.rol === "Administrador"
-                                                    ? <ShieldCheck size={20} className="text-purple-600" />
-                                                    : <User size={20} className="text-blue-600" />
-                                                }
-                                            </div>
-                                            <div className="min-w-0">
-                                                <p className="text-base font-semibold text-slate-800 truncate">
-                                                    {u.nombreCompleto}
-                                                </p>
-                                                <p className="text-sm text-slate-400 truncate">{u.correoElectronico}</p>
-                                            </div>
-                                        </button>
-                                        <div className="flex items-center gap-2 shrink-0 ml-2">
-                                            <span className={`text-xs px-2 py-1 rounded-lg font-semibold ${u.rol === "Administrador"
-                                                ? "bg-purple-100 text-purple-700"
-                                                : "bg-blue-100 text-blue-700"
-                                                }`}>
-                                                {u.rol}
-                                            </span>
+                        <>
+                            <div className="divide-y divide-slate-100">
+                                {usuariosPagina.map((u) => (
+                                    <div key={u.id}>
+                                        <div className="flex items-center justify-between px-4 py-4">
                                             <button
                                                 onClick={() => usuarioEditando === u.id ? cerrarEditar() : abrirEditar(u)}
-                                                className="w-9 h-9 flex items-center justify-center text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors"
+                                                className="flex items-center gap-3 flex-1 min-w-0 text-left"
                                             >
-                                                {usuarioEditando === u.id
-                                                    ? <X size={17} />
-                                                    : <Pencil size={17} />
-                                                }
+                                                <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${u.rol === "Administrador" ? "bg-purple-100" : "bg-blue-100"
+                                                    }`}>
+                                                    {u.rol === "Administrador"
+                                                        ? <ShieldCheck size={20} className="text-purple-600" />
+                                                        : <User size={20} className="text-blue-600" />}
+                                                </div>
+                                                <div className="min-w-0">
+                                                    <p className="text-base font-semibold text-slate-800 truncate">{u.nombreCompleto}</p>
+                                                    <p className="text-sm text-slate-400 truncate">{u.correoElectronico}</p>
+                                                </div>
                                             </button>
-                                            <button
-                                                onClick={() => setUsuarioAEliminar(u)}
-                                                className="w-9 h-9 flex items-center justify-center text-red-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors"
-                                            >
-                                                <Trash2 size={17} />
-                                            </button>
+                                            <div className="flex items-center gap-2 shrink-0 ml-2">
+                                                <span className={`text-xs px-2 py-1 rounded-lg font-semibold ${u.rol === "Administrador" ? "bg-purple-100 text-purple-700" : "bg-blue-100 text-blue-700"
+                                                    }`}>
+                                                    {u.rol}
+                                                </span>
+                                                <button
+                                                    onClick={() => usuarioEditando === u.id ? cerrarEditar() : abrirEditar(u)}
+                                                    className="w-9 h-9 flex items-center justify-center text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors"
+                                                >
+                                                    {usuarioEditando === u.id ? <X size={17} /> : <Pencil size={17} />}
+                                                </button>
+                                                <button
+                                                    onClick={() => setUsuarioAEliminar(u)}
+                                                    className="w-9 h-9 flex items-center justify-center text-red-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors"
+                                                >
+                                                    <Trash2 size={17} />
+                                                </button>
+                                            </div>
                                         </div>
+
+                                        {usuarioEditando === u.id && (
+                                            <div className="px-4 pb-4 space-y-4 border-t border-slate-100 pt-4 bg-slate-50">
+                                                <p className="text-base font-bold text-slate-700">Editar usuario</p>
+
+                                                <div>
+                                                    <div className="flex items-center gap-2 mb-2">
+                                                        <User size={16} className="text-slate-400" />
+                                                        <p className="text-sm font-semibold text-slate-600">Nombre completo</p>
+                                                    </div>
+                                                    <input
+                                                        type="text"
+                                                        value={formEditar.nombreCompleto}
+                                                        onChange={e => actualizarEditar("nombreCompleto", e.target.value)}
+                                                        className={`w-full border-2 rounded-xl px-4 py-3 text-base text-slate-800 focus:outline-none transition-all bg-white ${erroresEditar.nombreCompleto ? "border-red-300 bg-red-50" : "border-slate-200 focus:border-blue-400"
+                                                            }`}
+                                                    />
+                                                    {erroresEditar.nombreCompleto && <p className="text-sm text-red-500 mt-1">{erroresEditar.nombreCompleto}</p>}
+                                                </div>
+
+                                                <div>
+                                                    <div className="flex items-center gap-2 mb-2">
+                                                        <Mail size={16} className="text-slate-400" />
+                                                        <p className="text-sm font-semibold text-slate-600">Correo electrónico</p>
+                                                    </div>
+                                                    <input
+                                                        type="email"
+                                                        value={formEditar.correoElectronico}
+                                                        onChange={e => actualizarEditar("correoElectronico", e.target.value)}
+                                                        className={`w-full border-2 rounded-xl px-4 py-3 text-base text-slate-800 focus:outline-none transition-all bg-white ${erroresEditar.correoElectronico ? "border-red-300 bg-red-50" : "border-slate-200 focus:border-blue-400"
+                                                            }`}
+                                                    />
+                                                    {erroresEditar.correoElectronico && <p className="text-sm text-red-500 mt-1">{erroresEditar.correoElectronico}</p>}
+                                                </div>
+
+                                                <div>
+                                                    <div className="flex items-center gap-2 mb-2">
+                                                        <Lock size={16} className="text-slate-400" />
+                                                        <p className="text-sm font-semibold text-slate-600">
+                                                            Nueva contraseña <span className="text-slate-400 font-normal">(dejar vacío para no cambiar)</span>
+                                                        </p>
+                                                    </div>
+                                                    <input
+                                                        type="password"
+                                                        value={formEditar.nuevaContrasena}
+                                                        onChange={e => actualizarEditar("nuevaContrasena", e.target.value)}
+                                                        placeholder="Mínimo 6 caracteres"
+                                                        className={`w-full border-2 rounded-xl px-4 py-3 text-base text-slate-800 placeholder-slate-400 focus:outline-none transition-all bg-white ${erroresEditar.nuevaContrasena ? "border-red-300 bg-red-50" : "border-slate-200 focus:border-blue-400"
+                                                            }`}
+                                                    />
+                                                    {erroresEditar.nuevaContrasena && <p className="text-sm text-red-500 mt-1">{erroresEditar.nuevaContrasena}</p>}
+                                                </div>
+
+                                                <div>
+                                                    <div className="flex items-center gap-2 mb-2">
+                                                        <ShieldCheck size={16} className="text-slate-400" />
+                                                        <p className="text-sm font-semibold text-slate-600">Rol</p>
+                                                    </div>
+                                                    <div className="grid grid-cols-2 gap-2">
+                                                        {["Vendedor", "Administrador"].map(r => (
+                                                            <button
+                                                                key={r}
+                                                                onClick={() => actualizarEditar("rol", r)}
+                                                                className={`py-3 rounded-xl text-base font-semibold border-2 transition-all ${formEditar.rol === r
+                                                                    ? "bg-blue-600 border-blue-600 text-white shadow-sm"
+                                                                    : "bg-white border-slate-200 text-slate-700 hover:border-blue-300"
+                                                                    }`}
+                                                            >
+                                                                {r}
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                </div>
+
+                                                <div className="flex gap-3 pt-1">
+                                                    <button
+                                                        onClick={cerrarEditar}
+                                                        className="flex-1 bg-white hover:bg-slate-100 text-slate-700 font-semibold rounded-xl py-4 text-base border-2 border-slate-200 transition-colors"
+                                                    >
+                                                        Cancelar
+                                                    </button>
+                                                    <button
+                                                        onClick={actualizarUsuario}
+                                                        disabled={guardando}
+                                                        className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold rounded-xl py-4 text-base transition-colors"
+                                                    >
+                                                        {guardando ? "Guardando..." : "Guardar cambios"}
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
-
-                                    {/* Formulario editar inline */}
-                                    {usuarioEditando === u.id && (
-                                        <div className="px-4 pb-4 space-y-4 border-t border-slate-100 pt-4 bg-slate-50">
-                                            <p className="text-base font-bold text-slate-700">Editar usuario</p>
-
-                                            <div>
-                                                <div className="flex items-center gap-2 mb-2">
-                                                    <User size={16} className="text-slate-400" />
-                                                    <p className="text-sm font-semibold text-slate-600">Nombre completo</p>
-                                                </div>
-                                                <input
-                                                    type="text"
-                                                    value={formEditar.nombreCompleto}
-                                                    onChange={e => actualizarEditar("nombreCompleto", e.target.value)}
-                                                    className={`w-full border-2 rounded-xl px-4 py-3 text-base text-slate-800 focus:outline-none transition-all bg-white ${erroresEditar.nombreCompleto ? "border-red-300 bg-red-50" : "border-slate-200 focus:border-blue-400"
-                                                        }`}
-                                                />
-                                                {erroresEditar.nombreCompleto && <p className="text-sm text-red-500 mt-1">{erroresEditar.nombreCompleto}</p>}
-                                            </div>
-
-                                            <div>
-                                                <div className="flex items-center gap-2 mb-2">
-                                                    <Mail size={16} className="text-slate-400" />
-                                                    <p className="text-sm font-semibold text-slate-600">Correo electrónico</p>
-                                                </div>
-                                                <input
-                                                    type="email"
-                                                    value={formEditar.correoElectronico}
-                                                    onChange={e => actualizarEditar("correoElectronico", e.target.value)}
-                                                    className={`w-full border-2 rounded-xl px-4 py-3 text-base text-slate-800 focus:outline-none transition-all bg-white ${erroresEditar.correoElectronico ? "border-red-300 bg-red-50" : "border-slate-200 focus:border-blue-400"
-                                                        }`}
-                                                />
-                                                {erroresEditar.correoElectronico && <p className="text-sm text-red-500 mt-1">{erroresEditar.correoElectronico}</p>}
-                                            </div>
-
-                                            <div>
-                                                <div className="flex items-center gap-2 mb-2">
-                                                    <Lock size={16} className="text-slate-400" />
-                                                    <p className="text-sm font-semibold text-slate-600">
-                                                        Nueva contraseña <span className="text-slate-400 font-normal">(dejar vacío para no cambiar)</span>
-                                                    </p>
-                                                </div>
-                                                <input
-                                                    type="password"
-                                                    value={formEditar.nuevaContrasena}
-                                                    onChange={e => actualizarEditar("nuevaContrasena", e.target.value)}
-                                                    placeholder="Mínimo 6 caracteres"
-                                                    className={`w-full border-2 rounded-xl px-4 py-3 text-base text-slate-800 placeholder-slate-400 focus:outline-none transition-all bg-white ${erroresEditar.nuevaContrasena ? "border-red-300 bg-red-50" : "border-slate-200 focus:border-blue-400"
-                                                        }`}
-                                                />
-                                                {erroresEditar.nuevaContrasena && <p className="text-sm text-red-500 mt-1">{erroresEditar.nuevaContrasena}</p>}
-                                            </div>
-
-                                            <div>
-                                                <div className="flex items-center gap-2 mb-2">
-                                                    <ShieldCheck size={16} className="text-slate-400" />
-                                                    <p className="text-sm font-semibold text-slate-600">Rol</p>
-                                                </div>
-                                                <div className="grid grid-cols-2 gap-2">
-                                                    {["Vendedor", "Administrador"].map(r => (
-                                                        <button
-                                                            key={r}
-                                                            onClick={() => actualizarEditar("rol", r)}
-                                                            className={`py-3 rounded-xl text-base font-semibold border-2 transition-all ${formEditar.rol === r
-                                                                ? "bg-blue-600 border-blue-600 text-white shadow-sm"
-                                                                : "bg-white border-slate-200 text-slate-700 hover:border-blue-300"
-                                                                }`}
-                                                        >
-                                                            {r}
-                                                        </button>
-                                                    ))}
-                                                </div>
-                                            </div>
-
-                                            <div className="flex gap-3 pt-1">
-                                                <button
-                                                    onClick={cerrarEditar}
-                                                    className="flex-1 bg-white hover:bg-slate-100 text-slate-700 font-semibold rounded-xl py-4 text-base border-2 border-slate-200 transition-colors"
-                                                >
-                                                    Cancelar
-                                                </button>
-                                                <button
-                                                    onClick={actualizarUsuario}
-                                                    disabled={guardando}
-                                                    className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold rounded-xl py-4 text-base transition-colors"
-                                                >
-                                                    {guardando ? "Guardando..." : "Guardar cambios"}
-                                                </button>
-                                            </div>
-                                        </div>
-                                    )}
-
-                                </div>
-                            ))}
-                        </div>
+                                ))}
+                            </div>
+                            <Paginacion
+                                paginaActual={pagina}
+                                totalPaginas={totalPaginas}
+                                totalRegistros={usuarios.length}
+                                porPagina={porPagina}
+                                onCambiarPagina={setPagina}
+                                onCambiarPorPagina={setPorPagina}
+                            />
+                        </>
                     )}
                 </div>
 

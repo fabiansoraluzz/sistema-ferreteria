@@ -9,8 +9,7 @@ import { Alerta } from "@/components/ui/Alerta";
 import { ModalConfirmacion } from "@/components/ui/ModalConfirmacion";
 import { useAlerta } from "@/hooks/useAlerta";
 import { Paginacion } from "@/components/ui/Paginacion";
-
-const POR_PAGINA = 10;
+import { usePorPagina } from "@/hooks/usePorPagina";
 
 export default function CategoriasPage() {
     const alerta = useAlerta();
@@ -24,8 +23,10 @@ export default function CategoriasPage() {
     const [descripcion, setDescripcion] = useState("");
     const [categoriaAEliminar, setCategoriaAEliminar] = useState<Categoria | null>(null);
     const [pagina, setPagina] = useState(1);
+    const [porPagina, setPorPagina] = usePorPagina();
 
     useEffect(() => { cargarCategorias(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    useEffect(() => { setPagina(1); }, [porPagina]);
 
     async function cargarCategorias() {
         try {
@@ -86,8 +87,8 @@ export default function CategoriasPage() {
 
     const activas = categorias.filter(c => c.estaActivo);
     const inactivas = categorias.filter(c => !c.estaActivo);
-    const totalPaginas = Math.ceil(activas.length / POR_PAGINA);
-    const activasPagina = activas.slice((pagina - 1) * POR_PAGINA, pagina * POR_PAGINA);
+    const totalPaginas = Math.ceil(activas.length / porPagina);
+    const activasPagina = activas.slice((pagina - 1) * porPagina, pagina * porPagina);
 
     return (
         <>
@@ -184,14 +185,14 @@ export default function CategoriasPage() {
                                     </div>
                                 ))}
                             </div>
-                            {totalPaginas > 1 && (
-                                <div className="border-t border-slate-100 px-4 py-2">
-                                    <p className="text-sm text-slate-400 text-center mb-1">
-                                        {activas.length} categorías · página {pagina} de {totalPaginas}
-                                    </p>
-                                    <Paginacion paginaActual={pagina} totalPaginas={totalPaginas} onCambiar={setPagina} />
-                                </div>
-                            )}
+                            <Paginacion
+                                paginaActual={pagina}
+                                totalPaginas={totalPaginas}
+                                totalRegistros={activas.length}
+                                porPagina={porPagina}
+                                onCambiarPagina={setPagina}
+                                onCambiarPorPagina={setPorPagina}
+                            />
                         </>
                     )}
                 </div>

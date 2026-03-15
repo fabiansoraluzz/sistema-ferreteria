@@ -7,8 +7,7 @@ import api from "@/lib/api";
 import { Cliente } from "@/types";
 import { normalizar } from "@/lib/utils";
 import { Paginacion } from "@/components/ui/Paginacion";
-
-const POR_PAGINA = 10;
+import { usePorPagina } from "@/hooks/usePorPagina";
 
 export default function ClientesPage() {
     const [clientes, setClientes] = useState<Cliente[]>([]);
@@ -16,9 +15,10 @@ export default function ClientesPage() {
     const [filtro, setFiltro] = useState<"todos" | "conDeuda" | "alDia">("todos");
     const [cargando, setCargando] = useState(true);
     const [pagina, setPagina] = useState(1);
+    const [porPagina, setPorPagina] = usePorPagina();
 
-    useEffect(() => { cargarClientes(); }, []);
-    useEffect(() => { setPagina(1); }, [busqueda, filtro]);
+    useEffect(() => { cargarClientes(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    useEffect(() => { setPagina(1); }, [busqueda, filtro, porPagina]);
 
     async function cargarClientes() {
         try {
@@ -42,8 +42,8 @@ export default function ClientesPage() {
         return true;
     });
 
-    const totalPaginas = Math.ceil(clientesFiltrados.length / POR_PAGINA);
-    const clientesPagina = clientesFiltrados.slice((pagina - 1) * POR_PAGINA, pagina * POR_PAGINA);
+    const totalPaginas = Math.ceil(clientesFiltrados.length / porPagina);
+    const clientesPagina = clientesFiltrados.slice((pagina - 1) * porPagina, pagina * porPagina);
 
     const conDeuda = clientes.filter(c => c.deudaTotal > 0);
     const alDia = clientes.filter(c => c.deudaTotal === 0);
@@ -66,7 +66,10 @@ export default function ClientesPage() {
                     <h1 className="text-2xl font-bold text-slate-800">Clientes</h1>
                     <p className="text-base text-slate-500">{clientes.length} clientes registrados</p>
                 </div>
-                <Link href="/clientes/nuevo" className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-3 rounded-xl shadow-sm transition-colors">
+                <Link
+                    href="/clientes/nuevo"
+                    className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-3 rounded-xl shadow-sm transition-colors"
+                >
                     <Plus size={20} />
                     <span className="text-base">Nuevo</span>
                 </Link>
@@ -121,9 +124,14 @@ export default function ClientesPage() {
                     <>
                         <div className="divide-y divide-slate-100">
                             {clientesPagina.map((c) => (
-                                <Link key={c.id} href={`/clientes/${c.id}`} className="flex items-center justify-between px-4 py-4 hover:bg-slate-50 transition-colors">
+                                <Link
+                                    key={c.id}
+                                    href={`/clientes/${c.id}`}
+                                    className="flex items-center justify-between px-4 py-4 hover:bg-slate-50 transition-colors"
+                                >
                                     <div className="flex items-center gap-3 flex-1 min-w-0">
-                                        <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${c.deudaTotal > 0 ? "bg-red-100" : "bg-green-100"}`}>
+                                        <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${c.deudaTotal > 0 ? "bg-red-100" : "bg-green-100"
+                                            }`}>
                                             {c.deudaTotal > 0
                                                 ? <Users size={20} className="text-red-600" />
                                                 : <CheckCircle size={20} className="text-green-600" />}
@@ -156,12 +164,14 @@ export default function ClientesPage() {
                                 </Link>
                             ))}
                         </div>
-                        <div className="border-t border-slate-100 px-4 py-2">
-                            <p className="text-sm text-slate-400 text-center mb-1">
-                                {clientesFiltrados.length} clientes · página {pagina} de {totalPaginas}
-                            </p>
-                            <Paginacion paginaActual={pagina} totalPaginas={totalPaginas} onCambiar={setPagina} />
-                        </div>
+                        <Paginacion
+                            paginaActual={pagina}
+                            totalPaginas={totalPaginas}
+                            totalRegistros={clientesFiltrados.length}
+                            porPagina={porPagina}
+                            onCambiarPagina={setPagina}
+                            onCambiarPorPagina={setPorPagina}
+                        />
                     </>
                 )}
             </div>

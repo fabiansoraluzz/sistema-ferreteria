@@ -8,8 +8,7 @@ import api from "@/lib/api";
 import { PedidoResumen } from "@/types";
 import { normalizar } from "@/lib/utils";
 import { Paginacion } from "@/components/ui/Paginacion";
-
-const POR_PAGINA = 10;
+import { usePorPagina } from "@/hooks/usePorPagina";
 
 const ESTADOS = [
     { valor: "Todos", label: "Todos", color: "bg-blue-600 text-white", inactivo: "bg-blue-50 border-blue-200 text-blue-700" },
@@ -29,9 +28,10 @@ export default function PedidosPage() {
     const [busqueda, setBusqueda] = useState("");
     const [cargando, setCargando] = useState(true);
     const [pagina, setPagina] = useState(1);
+    const [porPagina, setPorPagina] = usePorPagina();
 
     useEffect(() => { cargarPedidos(estado); }, [estado]); // eslint-disable-line react-hooks/exhaustive-deps
-    useEffect(() => { setPagina(1); }, [busqueda, estado]);
+    useEffect(() => { setPagina(1); }, [busqueda, estado, porPagina]);
 
     async function cargarPedidos(estadoActual: string) {
         setCargando(true);
@@ -57,8 +57,8 @@ export default function PedidosPage() {
         normalizar(p.nombreCliente).includes(normalizar(busqueda))
     );
 
-    const totalPaginas = Math.ceil(pedidosFiltrados.length / POR_PAGINA);
-    const pedidosPagina = pedidosFiltrados.slice((pagina - 1) * POR_PAGINA, pagina * POR_PAGINA);
+    const totalPaginas = Math.ceil(pedidosFiltrados.length / porPagina);
+    const pedidosPagina = pedidosFiltrados.slice((pagina - 1) * porPagina, pagina * porPagina);
 
     function colorBadge(est: string) {
         const colores: Record<string, string> = {
@@ -85,7 +85,10 @@ export default function PedidosPage() {
                         {pedidos.length} {pedidos.length === 1 ? "pedido" : "pedidos"} encontrados
                     </p>
                 </div>
-                <Link href="/pedidos/nuevo" className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-3 rounded-xl shadow-sm transition-colors">
+                <Link
+                    href="/pedidos/nuevo"
+                    className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-3 rounded-xl shadow-sm transition-colors"
+                >
                     <Plus size={20} />
                     <span className="text-base">Nuevo</span>
                 </Link>
@@ -133,17 +136,21 @@ export default function PedidosPage() {
                         <>
                             <div className="divide-y divide-slate-100">
                                 {pedidosPagina.map((p) => (
-                                    <Link key={p.id} href={`/pedidos/${p.id}`} className="flex items-center justify-between px-4 py-4 hover:bg-slate-50 transition-colors">
+                                    <Link
+                                        key={p.id}
+                                        href={`/pedidos/${p.id}`}
+                                        className="flex items-center justify-between px-4 py-4 hover:bg-slate-50 transition-colors"
+                                    >
                                         <div className="flex items-center gap-3 flex-1 min-w-0">
                                             <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${p.estadoPedido === "Pendiente" ? "bg-amber-100" :
-                                                    p.estadoPedido === "Confirmado" ? "bg-blue-100" :
-                                                        p.estadoPedido === "EnReparto" ? "bg-orange-100" :
-                                                            p.estadoPedido === "Entregado" ? "bg-green-100" : "bg-slate-100"
+                                                p.estadoPedido === "Confirmado" ? "bg-blue-100" :
+                                                    p.estadoPedido === "EnReparto" ? "bg-orange-100" :
+                                                        p.estadoPedido === "Entregado" ? "bg-green-100" : "bg-slate-100"
                                                 }`}>
                                                 <ClipboardList size={20} className={`${p.estadoPedido === "Pendiente" ? "text-amber-600" :
-                                                        p.estadoPedido === "Confirmado" ? "text-blue-600" :
-                                                            p.estadoPedido === "EnReparto" ? "text-orange-600" :
-                                                                p.estadoPedido === "Entregado" ? "text-green-600" : "text-slate-500"
+                                                    p.estadoPedido === "Confirmado" ? "text-blue-600" :
+                                                        p.estadoPedido === "EnReparto" ? "text-orange-600" :
+                                                            p.estadoPedido === "Entregado" ? "text-green-600" : "text-slate-500"
                                                     }`} />
                                             </div>
                                             <div className="min-w-0">
@@ -166,12 +173,14 @@ export default function PedidosPage() {
                                     </Link>
                                 ))}
                             </div>
-                            <div className="border-t border-slate-100 px-4 py-2">
-                                <p className="text-sm text-slate-400 text-center mb-1">
-                                    {pedidosFiltrados.length} pedidos · página {pagina} de {totalPaginas}
-                                </p>
-                                <Paginacion paginaActual={pagina} totalPaginas={totalPaginas} onCambiar={setPagina} />
-                            </div>
+                            <Paginacion
+                                paginaActual={pagina}
+                                totalPaginas={totalPaginas}
+                                totalRegistros={pedidosFiltrados.length}
+                                porPagina={porPagina}
+                                onCambiarPagina={setPagina}
+                                onCambiarPorPagina={setPorPagina}
+                            />
                         </>
                     )}
                 </div>

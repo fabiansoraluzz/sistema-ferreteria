@@ -7,8 +7,6 @@ import {
     Home, ClipboardList, Package, Users,
     LogOut, DollarSign, Settings,
 } from "lucide-react";
-import { Paginacion } from "@/components/ui/Paginacion";
-const POR_PAGINA = 10;
 
 interface Usuario {
     id: number;
@@ -62,8 +60,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                         <Link
                             href="/configuracion"
                             className={`p-1.5 rounded-lg transition-colors ${pathname.startsWith("/configuracion") || pathname.startsWith("/auditoria")
-                                ? "text-blue-600 bg-blue-50"
-                                : "text-slate-400 hover:text-slate-600 hover:bg-slate-100"
+                                    ? "text-blue-600 bg-blue-50"
+                                    : "text-slate-400 hover:text-slate-600 hover:bg-slate-100"
                                 }`}
                         >
                             <Settings size={20} />
@@ -92,7 +90,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                             <Link
                                 key={item.href}
                                 href={item.href}
-                                className={`flex-1 flex flex-col items-center py-3 gap-1 transition-colors ${activo ? "text-blue-600" : "text-slate-400 hover:text-slate-600"
+                                className={`flex-1 flex flex-col items-center py-3 gap-1 transition-colors relative ${activo ? "text-blue-600" : "text-slate-400 hover:text-slate-600"
                                     }`}
                             >
                                 <Icon size={22} strokeWidth={activo ? 2.5 : 1.8} />

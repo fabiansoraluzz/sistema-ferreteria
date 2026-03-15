@@ -3,14 +3,9 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
-    ArrowLeft,
-    Phone,
-    Package,
-    CheckCircle,
-    Truck,
-    XCircle,
-    AlertTriangle,
-    ChevronRight,
+    ArrowLeft, Phone, Package, CheckCircle, Truck,
+    XCircle, AlertTriangle, ChevronRight,
+    FileX, FileText, FileCheck,
 } from "lucide-react";
 import api from "@/lib/api";
 import { Pedido } from "@/types";
@@ -18,13 +13,51 @@ import { Alerta } from "@/components/ui/Alerta";
 import { ModalConfirmacion } from "@/components/ui/ModalConfirmacion";
 import { useAlerta } from "@/hooks/useAlerta";
 
+type TipoDocFiscal = "SinDocumento" | "SoloFactura" | "GuiaFactura";
+
+const DOCS_FISCALES: {
+    valor: TipoDocFiscal;
+    label: string;
+    sublabel: string;
+    icono: React.ReactNode;
+    activo: string;
+    inactivo: string;
+}[] = [
+        {
+            valor: "SinDocumento",
+            label: "Sin documento",
+            sublabel: "Venta informal",
+            icono: <FileX size={22} />,
+            activo: "bg-slate-600 border-slate-600 text-white shadow-md",
+            inactivo: "bg-slate-50 border-slate-200 text-slate-600 hover:border-slate-400",
+        },
+        {
+            valor: "SoloFactura",
+            label: "Solo factura",
+            sublabel: "Sin guía de remisión",
+            icono: <FileText size={22} />,
+            activo: "bg-blue-600 border-blue-600 text-white shadow-md",
+            inactivo: "bg-blue-50 border-blue-200 text-blue-700 hover:border-blue-400",
+        },
+        {
+            valor: "GuiaFactura",
+            label: "Guía + Factura",
+            sublabel: "Proceso SUNAT completo",
+            icono: <FileCheck size={22} />,
+            activo: "bg-green-600 border-green-600 text-white shadow-md",
+            inactivo: "bg-green-50 border-green-200 text-green-700 hover:border-green-400",
+        },
+    ];
+
 export default function DetallePedidoPage() {
     const params = useParams();
     const router = useRouter();
     const alerta = useAlerta();
+
     const [pedido, setPedido] = useState<Pedido | null>(null);
     const [cargando, setCargando] = useState(true);
     const [guardando, setGuardando] = useState(false);
+    const [guardandoDoc, setGuardandoDoc] = useState(false);
     const [usuario, setUsuario] = useState<{ rol: string } | null>(null);
     const [confirmarAvanzar, setConfirmarAvanzar] = useState(false);
     const [confirmarCancelar, setConfirmarCancelar] = useState(false);
@@ -33,13 +66,11 @@ export default function DetallePedidoPage() {
         const u = localStorage.getItem("usuario");
         if (u) setUsuario(JSON.parse(u));
         cargarPedido();
-    }, []);
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     async function cargarPedido() {
         try {
-            const { data } = await api.get<Pedido>(
-                `/Pedidos/ObtenerDetallePedido/${params.id}`
-            );
+            const { data } = await api.get<Pedido>(`/Pedidos/ObtenerDetallePedido/${params.id}`);
             setPedido(data);
         } catch {
             router.push("/pedidos");
@@ -84,6 +115,22 @@ export default function DetallePedidoPage() {
             alerta.mostrar("Hubo un error al cancelar el pedido", "error");
         } finally {
             setGuardando(false);
+        }
+    }
+
+    async function actualizarDocumentoFiscal(tipo: TipoDocFiscal) {
+        if (!pedido || tipo === pedido.tipoDocumentoFiscal) return;
+        setGuardandoDoc(true);
+        try {
+            await api.patch(`/Pedidos/ActualizarDocumentoFiscal/${params.id}`, {
+                tipoDocumentoFiscal: tipo,
+            });
+            setPedido(prev => prev ? { ...prev, tipoDocumentoFiscal: tipo } : prev);
+            alerta.mostrar("Documento fiscal actualizado", "ok");
+        } catch {
+            alerta.mostrar("Error al actualizar el documento fiscal", "error");
+        } finally {
+            setGuardandoDoc(false);
         }
     }
 
@@ -141,7 +188,10 @@ export default function DetallePedidoPage() {
     if (!pedido) return null;
 
     const hayBotonAvanzar = ["Pendiente", "Confirmado", "EnReparto"].includes(pedido.estadoPedido);
-    const puedeCancel = usuario?.rol === "Administrador" && pedido.estadoPedido !== "Cancelado" && pedido.estadoPedido !== "Entregado";
+    const puedeCancel = usuario?.rol === "Administrador"
+        && pedido.estadoPedido !== "Cancelado"
+        && pedido.estadoPedido !== "Entregado";
+    const docActual = (pedido.tipoDocumentoFiscal ?? "SinDocumento") as TipoDocFiscal;
 
     return (
         <>
@@ -162,19 +212,21 @@ export default function DetallePedidoPage() {
 
                 <Alerta mensaje={alerta.mensaje} tipo={alerta.tipo} visible={alerta.visible} />
 
+                {/* Estado */}
                 <div className={`rounded-2xl px-4 py-4 border-2 flex items-center gap-3 ${colorTarjetaEstado(pedido.estadoPedido)}`}>
-                    {pedido.estadoPedido === "Pendiente" ? <AlertTriangle size={24} /> : null}
-                    {pedido.estadoPedido === "Confirmado" ? <CheckCircle size={24} /> : null}
-                    {pedido.estadoPedido === "EnReparto" ? <Truck size={24} /> : null}
-                    {pedido.estadoPedido === "Entregado" ? <CheckCircle size={24} /> : null}
-                    {pedido.estadoPedido === "Cancelado" ? <XCircle size={24} /> : null}
+                    {pedido.estadoPedido === "Pendiente" && <AlertTriangle size={24} />}
+                    {pedido.estadoPedido === "Confirmado" && <CheckCircle size={24} />}
+                    {pedido.estadoPedido === "EnReparto" && <Truck size={24} />}
+                    {pedido.estadoPedido === "Entregado" && <CheckCircle size={24} />}
+                    {pedido.estadoPedido === "Cancelado" && <XCircle size={24} />}
                     <div>
                         <p className="text-base font-bold">Estado: {etiquetaEstado(pedido.estadoPedido)}</p>
                         <p className="text-sm opacity-80">{descripcionEstado(pedido.estadoPedido)}</p>
                     </div>
                 </div>
 
-                {hayBotonAvanzar ? (
+                {/* Botón avanzar estado */}
+                {hayBotonAvanzar && (
                     <button
                         onClick={() => setConfirmarAvanzar(true)}
                         disabled={guardando}
@@ -183,8 +235,41 @@ export default function DetallePedidoPage() {
                         {iconoBoton(pedido.estadoPedido)}
                         {textoBoton(pedido.estadoPedido)}
                     </button>
-                ) : null}
+                )}
 
+                {/* Documento fiscal */}
+                <div className="bg-white rounded-2xl border-2 border-slate-200 overflow-hidden shadow-sm">
+                    <div className="px-4 py-3 bg-slate-50 border-b border-slate-100">
+                        <p className="text-sm font-bold text-slate-500 uppercase tracking-wide">
+                            Documento fiscal
+                        </p>
+                        <p className="text-xs text-slate-400 mt-0.5">
+                            Indica cómo se registró esta venta ante SUNAT
+                        </p>
+                    </div>
+                    <div className="p-4 grid grid-cols-3 gap-2">
+                        {DOCS_FISCALES.map(doc => (
+                            <button
+                                key={doc.valor}
+                                onClick={() => actualizarDocumentoFiscal(doc.valor)}
+                                disabled={guardandoDoc}
+                                className={`flex flex-col items-center gap-2 px-2 py-4 rounded-2xl border-2 transition-all disabled:opacity-60 ${docActual === doc.valor ? doc.activo : doc.inactivo
+                                    }`}
+                            >
+                                {doc.icono}
+                                <span className="text-sm font-bold leading-tight text-center">
+                                    {doc.label}
+                                </span>
+                                <span className={`text-xs leading-tight text-center font-normal ${docActual === doc.valor ? "opacity-80" : "opacity-60"
+                                    }`}>
+                                    {doc.sublabel}
+                                </span>
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Cliente */}
                 <div className="bg-white rounded-2xl border-2 border-slate-200 overflow-hidden shadow-sm">
                     <div className="px-4 py-3 bg-slate-50 border-b border-slate-100">
                         <p className="text-sm font-bold text-slate-500 uppercase tracking-wide">Cliente</p>
@@ -192,7 +277,10 @@ export default function DetallePedidoPage() {
                     <div className="px-4 py-4 flex items-center justify-between">
                         <div>
                             <p className="text-lg font-bold text-slate-800">{pedido.nombreCliente}</p>
-                            <a href={`tel:${pedido.telefonoCliente}`} className="flex items-center gap-2 text-blue-600 font-semibold mt-1">
+                            <a
+                                href={`tel:${pedido.telefonoCliente}`}
+                                className="flex items-center gap-2 text-blue-600 font-semibold mt-1"
+                            >
                                 <Phone size={16} />
                                 {pedido.telefonoCliente}
                             </a>
@@ -201,9 +289,12 @@ export default function DetallePedidoPage() {
                     </div>
                 </div>
 
+                {/* Productos */}
                 <div className="bg-white rounded-2xl border-2 border-slate-200 overflow-hidden shadow-sm">
                     <div className="px-4 py-3 bg-slate-50 border-b border-slate-100">
-                        <p className="text-sm font-bold text-slate-500 uppercase tracking-wide">Productos pedidos</p>
+                        <p className="text-sm font-bold text-slate-500 uppercase tracking-wide">
+                            Productos pedidos
+                        </p>
                     </div>
                     <div className="divide-y divide-slate-100">
                         {pedido.detalles.map((d) => (
@@ -212,54 +303,77 @@ export default function DetallePedidoPage() {
                                     <Package size={20} className="text-blue-600" />
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                    <p className="text-base font-semibold text-slate-800 truncate">{d.nombreProducto}</p>
-                                    <p className="text-sm text-slate-400">{d.cantidad} {d.unidadMedida} x S/ {d.precioUnitario.toFixed(2)}</p>
+                                    <p className="text-base font-semibold text-slate-800 truncate">
+                                        {d.nombreProducto}
+                                    </p>
+                                    <p className="text-sm text-slate-400">
+                                        {d.cantidad} {d.unidadMedida} x S/ {d.precioUnitario.toFixed(2)}
+                                    </p>
                                 </div>
-                                <p className="text-base font-bold text-slate-800 shrink-0">S/ {d.subtotal.toFixed(2)}</p>
+                                <p className="text-base font-bold text-slate-800 shrink-0">
+                                    S/ {d.subtotal.toFixed(2)}
+                                </p>
                             </div>
                         ))}
                     </div>
                 </div>
 
+                {/* Resumen cobro */}
                 <div className="bg-white rounded-2xl border-2 border-slate-200 overflow-hidden shadow-sm">
                     <div className="px-4 py-3 bg-slate-50 border-b border-slate-100">
-                        <p className="text-sm font-bold text-slate-500 uppercase tracking-wide">Resumen de cobro</p>
+                        <p className="text-sm font-bold text-slate-500 uppercase tracking-wide">
+                            Resumen de cobro
+                        </p>
                     </div>
                     <div className="divide-y divide-slate-100">
                         <div className="flex justify-between px-4 py-4">
                             <span className="text-base text-slate-500">Subtotal</span>
-                            <span className="text-base font-semibold text-slate-800">S/ {pedido.subtotal.toFixed(2)}</span>
+                            <span className="text-base font-semibold text-slate-800">
+                                S/ {pedido.subtotal.toFixed(2)}
+                            </span>
                         </div>
                         <div className="flex justify-between px-4 py-4">
                             <span className="text-base text-slate-500">IGV 18%</span>
-                            <span className="text-base font-semibold text-slate-800">S/ {pedido.montoImpuesto.toFixed(2)}</span>
+                            <span className="text-base font-semibold text-slate-800">
+                                S/ {pedido.montoImpuesto.toFixed(2)}
+                            </span>
                         </div>
                         <div className="flex justify-between px-4 py-5">
                             <span className="text-lg font-bold text-slate-800">Total a cobrar</span>
-                            <span className="text-2xl font-bold text-blue-600">S/ {pedido.total.toFixed(2)}</span>
+                            <span className="text-2xl font-bold text-blue-600">
+                                S/ {pedido.total.toFixed(2)}
+                            </span>
                         </div>
-                        {pedido.montoPagado > 0 ? (
+                        {pedido.montoPagado > 0 && (
                             <div className="flex justify-between px-4 py-4 bg-green-50">
                                 <span className="text-base font-semibold text-green-700">Ya pago</span>
-                                <span className="text-xl font-bold text-green-600">S/ {pedido.montoPagado.toFixed(2)}</span>
+                                <span className="text-xl font-bold text-green-600">
+                                    S/ {pedido.montoPagado.toFixed(2)}
+                                </span>
                             </div>
-                        ) : null}
-                        {pedido.saldoPendiente > 0 ? (
+                        )}
+                        {pedido.saldoPendiente > 0 && (
                             <div className="flex justify-between px-4 py-4 bg-red-50">
                                 <span className="text-base font-semibold text-red-700">Falta cobrar</span>
-                                <span className="text-xl font-bold text-red-600">S/ {pedido.saldoPendiente.toFixed(2)}</span>
+                                <span className="text-xl font-bold text-red-600">
+                                    S/ {pedido.saldoPendiente.toFixed(2)}
+                                </span>
                             </div>
-                        ) : null}
+                        )}
                     </div>
                 </div>
 
-                {pedido.observaciones ? (
+                {/* Observaciones */}
+                {pedido.observaciones && (
                     <div className="bg-amber-50 border-2 border-amber-200 rounded-2xl px-4 py-4">
-                        <p className="text-sm font-bold text-amber-700 uppercase tracking-wide mb-1">Observaciones</p>
+                        <p className="text-sm font-bold text-amber-700 uppercase tracking-wide mb-1">
+                            Observaciones
+                        </p>
                         <p className="text-base text-amber-800">{pedido.observaciones}</p>
                     </div>
-                ) : null}
+                )}
 
+                {/* Fechas */}
                 <div className="bg-white rounded-2xl border-2 border-slate-200 overflow-hidden shadow-sm">
                     <div className="flex justify-between px-4 py-4 border-b border-slate-100">
                         <span className="text-base text-slate-500">Fecha del pedido</span>
@@ -269,7 +383,7 @@ export default function DetallePedidoPage() {
                             })}
                         </span>
                     </div>
-                    {pedido.fechaEntrega ? (
+                    {pedido.fechaEntrega && (
                         <div className="flex justify-between px-4 py-4">
                             <span className="text-base text-slate-500">Fecha de entrega</span>
                             <span className="text-base font-bold text-blue-600">
@@ -278,10 +392,11 @@ export default function DetallePedidoPage() {
                                 })}
                             </span>
                         </div>
-                    ) : null}
+                    )}
                 </div>
 
-                {puedeCancel ? (
+                {/* Cancelar */}
+                {puedeCancel && (
                     <button
                         onClick={() => setConfirmarCancelar(true)}
                         disabled={guardando}
@@ -290,7 +405,7 @@ export default function DetallePedidoPage() {
                         <XCircle size={20} />
                         Cancelar este pedido
                     </button>
-                ) : null}
+                )}
 
             </div>
 
