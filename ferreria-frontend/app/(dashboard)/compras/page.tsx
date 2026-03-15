@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
     ShoppingCart, Plus, ChevronRight,
-    Search, Truck, Package,
+    Search, Truck,
 } from "lucide-react";
 import api from "@/lib/api";
 import { CompraResumen, Proveedor } from "@/types";
@@ -88,8 +88,8 @@ export default function ComprasPage() {
                 <button
                     onClick={() => { setTab("compras"); setBusqueda(""); }}
                     className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-base transition-all ${tab === "compras"
-                            ? "bg-white text-blue-600 shadow-sm"
-                            : "text-slate-500 hover:text-slate-700"
+                        ? "bg-white text-blue-600 shadow-sm"
+                        : "text-slate-500 hover:text-slate-700"
                         }`}
                 >
                     <ShoppingCart size={18} />
@@ -98,8 +98,8 @@ export default function ComprasPage() {
                 <button
                     onClick={() => { setTab("proveedores"); setBusqueda(""); }}
                     className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-base transition-all ${tab === "proveedores"
-                            ? "bg-white text-blue-600 shadow-sm"
-                            : "text-slate-500 hover:text-slate-700"
+                        ? "bg-white text-blue-600 shadow-sm"
+                        : "text-slate-500 hover:text-slate-700"
                         }`}
                 >
                     <Truck size={18} />
