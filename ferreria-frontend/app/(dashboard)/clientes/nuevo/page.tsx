@@ -95,8 +95,6 @@ export default function NuevoClientePage() {
     const [guardando, setGuardando] = useState(false);
     const [errores, setErrores] = useState<Partial<FormCliente>>({});
     const [confirmarSalir, setConfirmarSalir] = useState(false);
-    const [mostrarExito, setMostrarExito] = useState(false);
-    const [idCreado, setIdCreado] = useState<number | null>(null);
     const alerta = useAlerta();
 
     useEffect(() => {
@@ -295,19 +293,6 @@ export default function NuevoClientePage() {
                 </button>
 
             </div>
-
-            {/* Modal éxito */}
-            <ModalConfirmacion
-                visible={mostrarExito}
-                titulo="¡Cliente guardado!"
-                descripcion="El cliente se registró correctamente."
-                textoCancelar="Ver detalle"
-                textoConfirmar="Ir a clientes"
-                colorConfirmar="azul"
-                cargando={false}
-                onCancelar={() => { setMostrarExito(false); router.push(`/clientes/${idCreado}`); }}
-                onConfirmar={() => { setMostrarExito(false); router.push("/clientes"); }}
-            />
 
             <ModalConfirmacion
                 visible={confirmarSalir}

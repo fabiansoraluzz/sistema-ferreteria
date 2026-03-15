@@ -37,8 +37,6 @@ export default function NuevoProductoPage() {
     const [guardando, setGuardando] = useState(false);
     const [errores, setErrores] = useState<Partial<FormProducto>>({});
     const [confirmarSalir, setConfirmarSalir] = useState(false);
-    const [mostrarExito, setMostrarExito] = useState(false);
-    const [idCreado, setIdCreado] = useState<number | null>(null);
 
     useEffect(() => {
         api.get<Categoria[]>("/Categorias/ObtenerCategorias").then(({ data }) => {
@@ -313,18 +311,6 @@ export default function NuevoProductoPage() {
                 </button>
 
             </div>
-
-            <ModalConfirmacion
-                visible={mostrarExito}
-                titulo="¡Producto guardado!"
-                descripcion="El producto se registró correctamente."
-                textoCancelar="Ver detalle"
-                textoConfirmar="Ir a inventario"
-                colorConfirmar="azul"
-                cargando={false}
-                onCancelar={() => { setMostrarExito(false); router.push(`/productos/${idCreado}`); }}
-                onConfirmar={() => { setMostrarExito(false); router.push("/productos"); }}
-            />
 
             <ModalConfirmacion
                 visible={confirmarSalir}
